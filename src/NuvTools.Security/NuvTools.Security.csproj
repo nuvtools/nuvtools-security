@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<LangVersion>11</LangVersion>
+		<TargetFrameworks>net6;net7</TargetFrameworks>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>Nuv Tools</Authors>
+		<Copyright>Copyright © 2023 Nuv Tools</Copyright>
+		<PackageProjectUrl>https://nuv.tools</PackageProjectUrl>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>NuvTools.Security.snk</AssemblyOriginatorKeyFile>
+		<Description>Common library for security purposes.</Description>
+		<Version>7.0.0</Version>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+		<PackageIcon>icon.png</PackageIcon>
+		<DelaySign>False</DelaySign>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<RepositoryUrl>https://github.com/nuvtools/nuvtools-security</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageTags>Nuv Tools Security Token JWT</PackageTags>	
+		<ImplicitUsings>true</ImplicitUsings>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.3" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.27.0" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.27.0" />
+		<PackageReference Include="NuvTools.Common" Version="7.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\..\icon.png">
+			<Link>icon.png</Link>
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\..\LICENSE">
+			<Link>LICENSE</Link>
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\NuvTools.Security.Models\NuvTools.Security.Models.csproj" />
+	</ItemGroup>
+
+</Project>
