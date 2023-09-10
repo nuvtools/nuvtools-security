@@ -10,7 +10,7 @@
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>NuvTools.Security.snk</AssemblyOriginatorKeyFile>
 		<Description>Common library for security purposes.</Description>
-		<Version>7.0.1</Version>
+		<Version>7.1.0</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -27,9 +27,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.10" />
-		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.32.2" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.2" />
-		<PackageReference Include="NuvTools.Common" Version="7.0.2" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.32.3" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.3" />
+		<PackageReference Include="NuvTools.Common" Version="7.1.3" />
 	</ItemGroup>
 
 	<ItemGroup>
