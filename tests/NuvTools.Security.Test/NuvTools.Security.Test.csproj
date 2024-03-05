@@ -1,18 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7</TargetFramework>
+		<TargetFramework>net8</TargetFramework>
 		<Nullable>enable</Nullable>
 		<Authors>Nuv Tools</Authors>
-		<Copyright>Copyright © 2023 Nuv Tools</Copyright>
+		<Copyright>Copyright © 2024 Nuv Tools</Copyright>
 		<Description>Contains models to be used by security modules.</Description>
-		<Version>7.1.0</Version>
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
-		<PackageReference Include="NUnit" Version="3.13.3" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+		<PackageReference Include="NUnit" Version="4.1.0" />
 		<PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
 	</ItemGroup>
 
