@@ -8,10 +8,10 @@ public class PermissionsOptions
     /// <summary>
     /// ApplicationId default
     /// </summary>
-    public string DefaultApplicationId { get; set; }
+    public required string DefaultApplicationId { get; set; }
 
     /// <summary>
     /// Internal: holds the type of the Enum Permissions 
     /// </summary>
-    public Enum DefaultEnumPermissionsType { get; set; }
+    public required Enum DefaultEnumPermissionsType { get; set; }
 }

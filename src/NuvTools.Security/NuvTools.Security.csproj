@@ -2,15 +2,15 @@
 
 	<PropertyGroup>
 		<LangVersion>latest</LangVersion>
-		<TargetFrameworks>net6;net7;net8</TargetFrameworks>
+		<TargetFrameworks>net8</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Nuv Tools</Authors>
 		<Copyright>Copyright © 2024 Nuv Tools</Copyright>
-		<PackageProjectUrl>https://nuv.tools</PackageProjectUrl>
+		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>NuvTools.Security.snk</AssemblyOriginatorKeyFile>
 		<Description>Common library for security purposes.</Description>
-		<Version>8.0.3</Version>
+		<Version>8.1.0</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -21,15 +21,16 @@
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>Nuv Tools Security Token JWT</PackageTags>	
+		<PackageTags>Nuv Tools Security Token JWT</PackageTags>
 		<ImplicitUsings>true</ImplicitUsings>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="8.0.2" />
-		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.4.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.4.0" />
-		<PackageReference Include="NuvTools.Common" Version="8.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="8.0.8" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.0.2" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
+		<PackageReference Include="NuvTools.Common" Version="8.1.2" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -50,7 +51,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\NuvTools.Security.Models\NuvTools.Security.Models.csproj" />
+		<ProjectReference Include="..\NuvTools.Security.Models\NuvTools.Security.Models.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -15,7 +15,7 @@ public class HasPermissionAttribute<TEnum> : AuthorizeAttribute where TEnum : En
     /// </summary>
     /// <param name="permission"></param>
     /// <param name="applicationId"></param>
-    public HasPermissionAttribute(TEnum permission, string applicationId = null) :
+    public HasPermissionAttribute(TEnum permission, string? applicationId = null) :
                                             base($"{applicationId}|{typeof(TEnum).AssemblyQualifiedName}|{permission.GetValueAsString()}")
     {
     }

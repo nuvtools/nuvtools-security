@@ -14,7 +14,7 @@ public static class ClaimExtensions
         var permissions = classType.GetFields(BindingFlags.Public | BindingFlags.Static |
            BindingFlags.FlattenHierarchy)
             .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.FieldType == typeof(string))
-            .Select(e => new Claim(claimType, (string)e.GetRawConstantValue()))
+            .Select(e => new Claim(claimType, (string)e.GetRawConstantValue()!))
             .ToList();
 
         claims.AddRange(permissions);
