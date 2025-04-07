@@ -1,7 +1,8 @@
 ﻿using System.Reflection;
 using System.Security.Claims;
+using ClaimTypes = NuvTools.Security.Models.ClaimTypes;
 
-namespace NuvTools.Security.Models.Extensions;
+namespace NuvTools.Security.Extensions;
 public static class ClaimExtensions
 {
     public static void AddPermission(this List<Claim> claims, string value)
@@ -11,11 +12,10 @@ public static class ClaimExtensions
 
     public static void AddByClass(this List<Claim> claims, string claimType, Type classType)
     {
-        var permissions = classType.GetFields(BindingFlags.Public | BindingFlags.Static |
+        List<Claim> permissions = [.. classType.GetFields(BindingFlags.Public | BindingFlags.Static |
            BindingFlags.FlattenHierarchy)
             .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.FieldType == typeof(string))
-            .Select(e => new Claim(claimType, (string)e.GetRawConstantValue()!))
-            .ToList();
+            .Select(e => new Claim(claimType, (string)e.GetRawConstantValue()!))];
 
         claims.AddRange(permissions);
     }

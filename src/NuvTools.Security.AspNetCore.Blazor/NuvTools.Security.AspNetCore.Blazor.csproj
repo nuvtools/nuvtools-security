@@ -1,15 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<LangVersion>latest</LangVersion>
 		<TargetFrameworks>net8;net9</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Nuv Tools</Authors>
 		<Copyright>Copyright © 2025 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
 		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>NuvTools.Security.snk</AssemblyOriginatorKeyFile>
-		<Description>Common library for security purposes.</Description>
+		<AssemblyOriginatorKeyFile>NuvTools.Security.AspNetCore.Blazor.snk</AssemblyOriginatorKeyFile>
+		<Description>A helper library for managing authentication and security-related tasks in Blazor applications.</Description>
 		<Version>9.1.0</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
@@ -21,16 +23,8 @@
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>Nuv Tools Security Token JWT</PackageTags>
-		<ImplicitUsings>true</ImplicitUsings>
-		<Nullable>enable</Nullable>
+		<PackageTags>Nuv Tools Security AspNetCore Blazor</PackageTags>
 	</PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.3" />
-		<PackageReference Include="NuvTools.Validation" Version="9.0.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.7.0" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="..\..\icon.png">
@@ -47,6 +41,18 @@
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
+	</ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.3" Condition="'$(TargetFramework)' == 'net9'" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.14" Condition="'$(TargetFramework)' == 'net8'" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="9.0.3" Condition="'$(TargetFramework)' == 'net9'" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="8.0.14" Condition="'$(TargetFramework)' == 'net8'" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\NuvTools.Security\NuvTools.Security.csproj" />
 	</ItemGroup>
 
 </Project>

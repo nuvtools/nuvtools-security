@@ -20,6 +20,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuvTools.Security", "src\Nu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuvTools.Security.Test", "tests\NuvTools.Security.Test\NuvTools.Security.Test.csproj", "{C8B742CD-4115-42C7-85EA-9D29B62C91F0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuvTools.Security.AspNetCore.Blazor", "src\NuvTools.Security.AspNetCore.Blazor\NuvTools.Security.AspNetCore.Blazor.csproj", "{502CC983-5C23-4EF0-9B66-C691C9350CC1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,10 @@ Global
 		{C8B742CD-4115-42C7-85EA-9D29B62C91F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8B742CD-4115-42C7-85EA-9D29B62C91F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8B742CD-4115-42C7-85EA-9D29B62C91F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{502CC983-5C23-4EF0-9B66-C691C9350CC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{502CC983-5C23-4EF0-9B66-C691C9350CC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{502CC983-5C23-4EF0-9B66-C691C9350CC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{502CC983-5C23-4EF0-9B66-C691C9350CC1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +57,7 @@ Global
 		{C10E1382-1201-41C6-8183-B5A9105DB35C} = {814F05D8-9FC4-4815-A665-8053E47E7698}
 		{795B3434-1D0C-45FB-941E-8B4712743171} = {814F05D8-9FC4-4815-A665-8053E47E7698}
 		{C8B742CD-4115-42C7-85EA-9D29B62C91F0} = {D4A175C6-4A8E-4532-B9F4-ACEF4EB6F8C0}
+		{502CC983-5C23-4EF0-9B66-C691C9350CC1} = {814F05D8-9FC4-4815-A665-8053E47E7698}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D0E80189-14F2-4621-9F44-529F26936A6C}
