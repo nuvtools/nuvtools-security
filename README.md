@@ -1,8 +1,5 @@
 # Nuv Tools Security Library
 
-## NuvTools.Security.Models Library
-Contains models to be used by security modules.
-
 ## NuvTools.Security Library
 Common library for security purposes.
 

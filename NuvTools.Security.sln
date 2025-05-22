@@ -12,8 +12,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{814F05D8-9FC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D4A175C6-4A8E-4532-B9F4-ACEF4EB6F8C0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuvTools.Security.Models", "src\NuvTools.Security.Models\NuvTools.Security.Models.csproj", "{E7A15CAB-25D7-4F79-BB85-498DF1B6323A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuvTools.Security.AspNetCore", "src\NuvTools.Security.AspNetCore\NuvTools.Security.AspNetCore.csproj", "{C10E1382-1201-41C6-8183-B5A9105DB35C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuvTools.Security", "src\NuvTools.Security\NuvTools.Security.csproj", "{795B3434-1D0C-45FB-941E-8B4712743171}"
@@ -28,10 +26,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E7A15CAB-25D7-4F79-BB85-498DF1B6323A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7A15CAB-25D7-4F79-BB85-498DF1B6323A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7A15CAB-25D7-4F79-BB85-498DF1B6323A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7A15CAB-25D7-4F79-BB85-498DF1B6323A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C10E1382-1201-41C6-8183-B5A9105DB35C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C10E1382-1201-41C6-8183-B5A9105DB35C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C10E1382-1201-41C6-8183-B5A9105DB35C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -53,7 +47,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{E7A15CAB-25D7-4F79-BB85-498DF1B6323A} = {814F05D8-9FC4-4815-A665-8053E47E7698}
 		{C10E1382-1201-41C6-8183-B5A9105DB35C} = {814F05D8-9FC4-4815-A665-8053E47E7698}
 		{795B3434-1D0C-45FB-941E-8B4712743171} = {814F05D8-9FC4-4815-A665-8053E47E7698}
 		{C8B742CD-4115-42C7-85EA-9D29B62C91F0} = {D4A175C6-4A8E-4532-B9F4-ACEF4EB6F8C0}
