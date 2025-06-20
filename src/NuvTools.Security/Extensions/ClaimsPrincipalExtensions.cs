@@ -1,5 +1,6 @@
 ﻿using NuvTools.Security.Models;
 using System.Security.Claims;
+using ClaimTypes = System.Security.Claims.ClaimTypes;
 
 namespace NuvTools.Security.Extensions;
 
@@ -7,24 +8,43 @@ public static class ClaimsPrincipalExtensions
 {
     public static string GetId(this ClaimsPrincipal user)
     {
-        return user.FindFirst(ClaimConstants.Sub)!.Value;
+        var id = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+              ?? user.FindFirst(ClaimConstants.Sub)?.Value;
+
+        if (string.IsNullOrWhiteSpace(id))
+            throw new InvalidOperationException("User ID claim not found.");
+
+        return id;
     }
 
-    public static string? GetGivenName(this ClaimsPrincipal user)
+    public static string? GetName(this ClaimsPrincipal user)
     {
-        return user.FindFirst(ClaimConstants.GivenName)?.Value;
+        var name = user.FindFirst(ClaimTypes.Name)?.Value
+               ?? user.FindFirst("name")?.Value 
+               ?? user.FindFirst(ClaimConstants.GivenName)?.Value;
+
+        return name;
     }
-    public static string? GetFamilyName(this ClaimsPrincipal user)
+
+    public static string? GetSurname(this ClaimsPrincipal user)
     {
-        return user.FindFirst(ClaimConstants.FamilyName)?.Value;
+        var surname = user.FindFirst(ClaimTypes.Surname)?.Value;
+
+        if (string.IsNullOrEmpty(surname))
+            surname = user.FindFirst("family_name")?.Value;
+
+        return surname;
     }
 
     public static string? GetEmail(this ClaimsPrincipal user)
     {
-        string? email = user.FindFirst("email")?.Value
-                        ?? user.FindFirst("upn")?.Value
-                        ?? user.FindFirst("preferred_username")?.Value
-                        ?? user.FindFirst("unique_name")?.Value;
+        var email = user.FindFirst(ClaimTypes.Email)?.Value;
+                
+        if (string.IsNullOrEmpty(email))
+            email = user.FindFirst("email")?.Value
+                     ?? user.FindFirst("upn")?.Value
+                     ?? user.FindFirst("preferred_username")?.Value
+                     ?? user.FindFirst("unique_name")?.Value;
 
         return !string.IsNullOrEmpty(email) && Validation.Validator.IsEmail(email) ? email : null;
     }
@@ -73,5 +93,4 @@ public static class ClaimsPrincipalExtensions
             throw new FormatException($"Failed to parse values for type {targetType.Name}.", ex);
         }
     }
-
 }
