@@ -12,7 +12,7 @@
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>NuvTools.Security.AspNetCore.Blazor.snk</AssemblyOriginatorKeyFile>
 		<Description>A helper library for managing authentication and security-related tasks in Blazor applications.</Description>
-		<Version>9.1.1</Version>
+		<Version>9.1.2</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
