@@ -1,15 +1,16 @@
 ﻿using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using NuvTools.Security.Extensions;
+using NuvTools.Security.Models;
 using System;
 using System.Security.Claims;
+using ClaimTypes = System.Security.Claims.ClaimTypes;
 
 namespace NuvTools.Security.Test;
 
 [TestFixture]
 public class ClaimsPrincipalExtensionsTests
 {
-    private ClaimsPrincipal CreatePrincipal(params Claim[] claims)
+    private static ClaimsPrincipal CreatePrincipal(params Claim[] claims)
     {
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         return new ClaimsPrincipal(identity);
@@ -28,7 +29,7 @@ public class ClaimsPrincipalExtensionsTests
     [Test]
     public void GetId_ShouldReturnSubIfNameIdentifierNotPresent()
     {
-        var user = CreatePrincipal(new Claim("sub", "456"));
+        var user = CreatePrincipal(new Claim(ClaimConstants.Sub, "456"));
 
         var id = user.GetId();
 
@@ -41,6 +42,26 @@ public class ClaimsPrincipalExtensionsTests
         var user = CreatePrincipal();
 
         Assert.Throws<InvalidOperationException>(() => user.GetId());
+    }
+
+    [Test]
+    public void GetSub_ShouldReturnSubClaim()
+    {
+        var user = CreatePrincipal(new Claim(ClaimConstants.Sub, "999"));
+
+        var sub = user.GetSub();
+
+        Assert.That(sub, Is.EqualTo("999"));
+    }
+
+    [Test]
+    public void GetNameIdentifier_ShouldReturnNameIdentifierClaim()
+    {
+        var user = CreatePrincipal(new Claim(ClaimTypes.NameIdentifier, "abc"));
+
+        var result = user.GetNameIdentifier();
+
+        Assert.That(result, Is.EqualTo("abc"));
     }
 
     [Test]
@@ -64,6 +85,16 @@ public class ClaimsPrincipalExtensionsTests
     }
 
     [Test]
+    public void GetGivenName_ShouldReturnGivenNameClaim()
+    {
+        var user = CreatePrincipal(new Claim(ClaimConstants.GivenName, "Charlie"));
+
+        var givenName = user.GetGivenName();
+
+        Assert.That(givenName, Is.EqualTo("Charlie"));
+    }
+
+    [Test]
     public void GetSurname_ShouldReturnClaimTypesSurname()
     {
         var user = CreatePrincipal(new Claim(ClaimTypes.Surname, "Smith"));
@@ -76,11 +107,21 @@ public class ClaimsPrincipalExtensionsTests
     [Test]
     public void GetSurname_ShouldReturnFallbackFamilyName()
     {
-        var user = CreatePrincipal(new Claim("family_name", "Johnson"));
+        var user = CreatePrincipal(new Claim(ClaimConstants.FamilyName, "Johnson"));
 
-        var surname = user.GetSurname();
+        var surname = user.GetFamilyName();
 
         Assert.That(surname, Is.EqualTo("Johnson"));
+    }
+
+    [Test]
+    public void GetFamilyName_ShouldReturnFamilyNameClaim()
+    {
+        var user = CreatePrincipal(new Claim(ClaimConstants.FamilyName, "Doe"));
+
+        var familyName = user.GetFamilyName();
+
+        Assert.That(familyName, Is.EqualTo("Doe"));
     }
 
     [Test]
@@ -96,11 +137,41 @@ public class ClaimsPrincipalExtensionsTests
     [Test]
     public void GetEmail_ShouldReturnFallbackValidEmail()
     {
-        var user = CreatePrincipal(new Claim("upn", "user@domain.com"));
+        var user = CreatePrincipal(new Claim(ClaimConstants.Upn, "user@domain.com"));
 
         var email = user.GetEmail();
 
         Assert.That(email, Is.EqualTo("user@domain.com"));
+    }
+
+    [Test]
+    public void GetUpn_ShouldReturnUpnClaim()
+    {
+        var user = CreatePrincipal(new Claim(ClaimConstants.Upn, "upn@domain.com"));
+
+        var upn = user.GetUpn();
+
+        Assert.That(upn, Is.EqualTo("upn@domain.com"));
+    }
+
+    [Test]
+    public void GetPreferredUsername_ShouldReturnPreferredUsernameClaim()
+    {
+        var user = CreatePrincipal(new Claim(ClaimConstants.PreferredUsername, "prefuser"));
+
+        var result = user.GetPreferredUsername();
+
+        Assert.That(result, Is.EqualTo("prefuser"));
+    }
+
+    [Test]
+    public void GetUniqueName_ShouldReturnUniqueNameClaim()
+    {
+        var user = CreatePrincipal(new Claim(ClaimConstants.UniqueName, "uniqueuser"));
+
+        var result = user.GetUniqueName();
+
+        Assert.That(result, Is.EqualTo("uniqueuser"));
     }
 
     [Test]
@@ -122,6 +193,7 @@ public class ClaimsPrincipalExtensionsTests
 
         Assert.That(result, Is.False);
     }
+   
 
     [Test]
     public void GetCustomAttributeValues_ShouldReturnParsedInts()
@@ -129,8 +201,10 @@ public class ClaimsPrincipalExtensionsTests
         var user = CreatePrincipal(new Claim("extension_ids", "1, 2, 3"));
 
         var values = user.GetCustomAttributeValues<int>("ids");
-
-        Assert.That(values, Is.EqualTo(new[] { 1, 2, 3 }));
+      
+        int[] expected = [1, 2, 3];
+        
+        Assert.That(values, Is.EqualTo(expected));
     }
 
     [Test]

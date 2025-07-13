@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace NuvTools.Security.AspNetCore.Configuration;
+namespace NuvTools.Security.AspNetCore.Configurations;
 
 public static class ServiceCollectionExtensions
 {

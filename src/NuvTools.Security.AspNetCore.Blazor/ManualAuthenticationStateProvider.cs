@@ -1,6 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
-using NuvTools.Security.Util;
+using NuvTools.Security.Helpers;
 using System.Security.Claims;
 
 namespace NuvTools.Security.AspNetCore.Blazor;

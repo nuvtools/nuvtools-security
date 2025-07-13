@@ -1,4 +1,4 @@
-﻿namespace NuvTools.Security.AspNetCore.Configuration;
+﻿namespace NuvTools.Security.AspNetCore.Configurations;
 
 /// <summary>
 /// Contains the mail configuration that should be loaded from appsettings file.

@@ -1,15 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<LangVersion>latest</LangVersion>
 		<TargetFrameworks>net8;net9</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Nuv Tools</Authors>
 		<Copyright>Copyright © 2025 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
 		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>NuvTools.Security.snk</AssemblyOriginatorKeyFile>
-		<Description>Common library for security purposes.</Description>
+		<AssemblyOriginatorKeyFile>NuvTools.Security.AspNetCore.Extensions.snk</AssemblyOriginatorKeyFile>
+		<Description>Common library for security purposes in ASP.NET Core.</Description>
 		<Version>9.2.0</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
@@ -21,15 +20,10 @@
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>Nuv Tools Security Token JWT</PackageTags>
+		<PackageTags>Nuv Tools Security AspNetCore Extensions</PackageTags>
 		<ImplicitUsings>true</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="NuvTools.Validation" Version="9.1.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.10.0" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="..\..\icon.png">
@@ -46,6 +40,15 @@
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\NuvTools.Security\NuvTools.Security.csproj" />
 	</ItemGroup>
 
 </Project>

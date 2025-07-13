@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace NuvTools.Security.Util;
+namespace NuvTools.Security.Helpers;
 
 public static class JwtHelper
 {
@@ -130,7 +130,7 @@ public static class JwtHelper
 
     private static byte[] ParseBase64WithoutPadding(string base64)
     {
-        int padding = 4 - (base64.Length % 4);
+        int padding = 4 - base64.Length % 4;
         if (padding < 4)
         {
             base64 = base64.PadRight(base64.Length + padding, '=');

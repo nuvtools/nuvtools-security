@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-using NuvTools.Security.Util;
+using NuvTools.Security.Helpers;
 
 namespace NuvTools.Security.AspNetCore.Blazor;
 

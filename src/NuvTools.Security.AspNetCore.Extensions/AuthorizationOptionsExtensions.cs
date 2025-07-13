@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
-namespace NuvTools.Security.Extensions;
+namespace NuvTools.Security.AspNetCore.Extensions;
 
 public static class AuthorizationOptionsExtensions
 {
@@ -12,7 +12,7 @@ public static class AuthorizationOptionsExtensions
 
     public static void AddPolicyWithRequiredClaim(this AuthorizationOptions options, string name, params Claim[] claims)
     {
-        if (options == null) throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
         if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
         if (claims == null || claims.Length == 0) throw new ArgumentException("At least one claim is required.", nameof(claims));
 

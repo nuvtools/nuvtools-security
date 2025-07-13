@@ -17,36 +17,65 @@ public static class ClaimsPrincipalExtensions
         return id;
     }
 
+    public static string? GetSub(this ClaimsPrincipal user)
+    {
+        return user.FindFirst(ClaimConstants.Sub)?.Value;
+    }
+
+    public static string? GetNameIdentifier(this ClaimsPrincipal user)
+    {
+        return user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    }
+
     public static string? GetName(this ClaimsPrincipal user)
     {
         var name = user.FindFirst(ClaimTypes.Name)?.Value
-               ?? user.FindFirst("name")?.Value 
-               ?? user.FindFirst(ClaimConstants.GivenName)?.Value;
+               ?? user.FindFirst("name")?.Value;
 
         return name;
+    }
+
+    public static string? GetGivenName(this ClaimsPrincipal user)
+    {
+        return user.FindFirst(ClaimConstants.GivenName)?.Value;
     }
 
     public static string? GetSurname(this ClaimsPrincipal user)
     {
         var surname = user.FindFirst(ClaimTypes.Surname)?.Value;
 
-        if (string.IsNullOrEmpty(surname))
-            surname = user.FindFirst("family_name")?.Value;
-
         return surname;
+    }
+
+    public static string? GetFamilyName(this ClaimsPrincipal user)
+    {
+        return user.FindFirst(ClaimConstants.FamilyName)?.Value;
     }
 
     public static string? GetEmail(this ClaimsPrincipal user)
     {
-        var email = user.FindFirst(ClaimTypes.Email)?.Value;
-                
-        if (string.IsNullOrEmpty(email))
-            email = user.FindFirst("email")?.Value
-                     ?? user.FindFirst("upn")?.Value
-                     ?? user.FindFirst("preferred_username")?.Value
-                     ?? user.FindFirst("unique_name")?.Value;
+        var email = user.FindFirst(ClaimTypes.Email)?.Value
+                 ?? user.FindFirst(ClaimConstants.Email)?.Value
+                 ?? user.FindFirst(ClaimConstants.Upn)?.Value
+                 ?? user.FindFirst(ClaimConstants.PreferredUsername)?.Value
+                 ?? user.FindFirst(ClaimConstants.UniqueName)?.Value;
 
         return !string.IsNullOrEmpty(email) && Validation.Validator.IsEmail(email) ? email : null;
+    }
+
+    public static string? GetUpn(this ClaimsPrincipal user)
+    {
+        return user.FindFirst(ClaimConstants.Upn)?.Value;
+    }
+
+    public static string? GetPreferredUsername(this ClaimsPrincipal user)
+    {
+        return user.FindFirst(ClaimConstants.PreferredUsername)?.Value;
+    }
+
+    public static string? GetUniqueName(this ClaimsPrincipal user)
+    {
+        return user.FindFirst(ClaimConstants.UniqueName)?.Value;
     }
 
     public static bool HasValue<T>(this ClaimsPrincipal user, string customAttriuteName, T value)
