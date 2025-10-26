@@ -7,108 +7,127 @@ using System.Text.Json;
 
 namespace NuvTools.Security.Helpers;
 
+/// <summary>
+/// Provides helper methods for generating, parsing, and validating JSON Web Tokens (JWTs).
+/// </summary>
 public static class JwtHelper
 {
-    public static string Generate(string key, string issuer, string audience, IEnumerable<Claim> claims, DateTime? expires)
+    /// <summary>
+    /// Generates a signed JWT token.
+    /// </summary>
+    /// <param name="key">The secret key used for signing the token.</param>
+    /// <param name="issuer">The token issuer (usually your API or authentication service).</param>
+    /// <param name="audience">The intended audience for the token.</param>
+    /// <param name="claims">The claims to include in the token payload.</param>
+    /// <param name="expires">The optional expiration date and time for the token.</param>
+    /// <returns>A signed JWT as a <see cref="string"/>.</returns>
+    public static string Generate(
+        string key,
+        string issuer,
+        string audience,
+        IEnumerable<Claim> claims,
+        DateTime? expires = null)
     {
-        JwtSecurityToken token = CreateJwtToken(key, issuer, audience, claims, expires);
+        var token = CreateJwtToken(key, issuer, audience, claims, expires);
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    /// <summary>
+    /// Extracts the <see cref="ClaimsPrincipal"/> from an expired JWT without validating its expiration.
+    /// </summary>
+    /// <param name="token">The expired JWT.</param>
+    /// <param name="key">The signing key used to validate the token signature.</param>
+    /// <returns>A <see cref="ClaimsPrincipal"/> representing the token subject.</returns>
+    /// <exception cref="SecurityTokenException">Thrown if the token signature or algorithm is invalid.</exception>
     public static ClaimsPrincipal GetPrincipalFromExpiredToken(string token, string key)
     {
-        TokenValidationParameters tokenValidationParameters = new()
+        ArgumentException.ThrowIfNullOrWhiteSpace(token);
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+        var parameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = GetSymmetricSecurityKey(key),
             ValidateIssuer = false,
             ValidateAudience = false,
+            ValidateLifetime = false,
             RoleClaimType = ClaimTypes.Role,
             ClockSkew = TimeSpan.Zero
         };
 
-        JwtSecurityTokenHandler handler = new();
-        ClaimsPrincipal principal = handler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+        var handler = new JwtSecurityTokenHandler();
+        var principal = handler.ValidateToken(token, parameters, out var securityToken);
 
-        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
-            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+        if (securityToken is not JwtSecurityToken jwtToken ||
+            !string.Equals(jwtToken.Header.Alg, SecurityAlgorithms.HmacSha256, StringComparison.OrdinalIgnoreCase))
         {
-            throw new SecurityTokenException("Invalid token");
+            throw new SecurityTokenException("Invalid token or signature algorithm.");
         }
 
         return principal;
     }
 
+    /// <summary>
+    /// Generates a secure random refresh token as a Base64 string.
+    /// </summary>
     public static string GenerateRefreshToken()
     {
-        byte[] randomNumber = new byte[32];
-        using RandomNumberGenerator rng = RandomNumberGenerator.Create();
-        rng.GetBytes(randomNumber);
-        return Convert.ToBase64String(randomNumber);
+        Span<byte> randomBytes = stackalloc byte[32];
+        RandomNumberGenerator.Fill(randomBytes);
+        return Convert.ToBase64String(randomBytes);
     }
 
-    public static List<Claim> ParseClaimsFromJwt(string jwt)
+    /// <summary>
+    /// Parses claims directly from a JWT string without signature validation.
+    /// </summary>
+    /// <param name="jwt">The JWT string.</param>
+    /// <returns>A list of <see cref="Claim"/> parsed from the token payload.</returns>
+    public static IReadOnlyList<Claim> ParseClaimsFromJwt(string jwt)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(jwt);
+
+        var payload = GetJwtPayload(jwt);
+        var keyValuePairs = DeserializePayload(payload);
+
         var claims = new List<Claim>();
-
-        var payload = jwt.Split('.')[1];
-        var jsonBytes = ParseBase64WithoutPadding(payload);
-        var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes);
-
-        if (keyValuePairs == null) return claims;
 
         if (keyValuePairs.TryGetValue("roles", out var rolesElement))
         {
-            if (rolesElement.ValueKind == JsonValueKind.Array)
-            {
-                foreach (var role in rolesElement.EnumerateArray())
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, role.GetString() ?? string.Empty));
-                }
-            }
-            else if (rolesElement.ValueKind == JsonValueKind.String)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, rolesElement.GetString() ?? string.Empty));
-            }
-
+            claims.AddRange(ExtractRoleClaims(rolesElement));
             keyValuePairs.Remove("roles");
         }
 
-        foreach (var kvp in keyValuePairs)
+        foreach (var (key, value) in keyValuePairs)
         {
-            var value = kvp.Value.ValueKind switch
-            {
-                JsonValueKind.String => kvp.Value.GetString() ?? string.Empty,
-                _ => kvp.Value.ToString()
-            };
+            var claimValue = value.ValueKind == JsonValueKind.String
+                ? value.GetString() ?? string.Empty
+                : value.ToString();
 
-            claims.Add(new Claim(kvp.Key, value));
+            claims.Add(new Claim(key, claimValue));
         }
 
         return claims;
     }
 
+    /// <summary>
+    /// Determines whether a JWT has expired based on its "exp" claim.
+    /// </summary>
     public static bool IsTokenExpired(string jwt)
     {
-        var payload = jwt.Split('.')[1];
-        var jsonBytes = ParseBase64WithoutPadding(payload);
-        var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes);
+        ArgumentException.ThrowIfNullOrWhiteSpace(jwt);
 
-        if (keyValuePairs == null 
-            || !keyValuePairs.TryGetValue("exp", out var expElement))
-        {
-            return true;
-        }
+        var payload = GetJwtPayload(jwt);
+        var keyValuePairs = DeserializePayload(payload);
+
+        if (!keyValuePairs.TryGetValue("exp", out var expElement))
+            throw new KeyNotFoundException("The JWT does not contain an 'exp' (expiration) claim.");
 
         var exp = expElement.GetInt64();
-        var expDate = DateTimeOffset.FromUnixTimeSeconds(exp);
-        return expDate <= DateTimeOffset.UtcNow;
+        return DateTimeOffset.FromUnixTimeSeconds(exp) <= DateTimeOffset.UtcNow;
     }
 
-    private static SymmetricSecurityKey GetSymmetricSecurityKey(string key)
-    {
-        return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-    }
+    private static SymmetricSecurityKey GetSymmetricSecurityKey(string key) =>
+        new(Encoding.UTF8.GetBytes(key));
 
     private static JwtSecurityToken CreateJwtToken(
         string key,
@@ -117,25 +136,70 @@ public static class JwtHelper
         IEnumerable<Claim> claims,
         DateTime? expires)
     {
-        SigningCredentials credentials = new(GetSymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature);
+        var credentials = new SigningCredentials(GetSymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
 
         return new JwtSecurityToken(
             issuer: issuer,
             audience: audience,
             claims: claims,
             expires: expires,
-            signingCredentials: credentials
-        );
+            signingCredentials: credentials);
     }
 
+    private static string GetJwtPayload(string jwt)
+    {
+        var parts = jwt.Split('.');
+        if (parts.Length < 2)
+            throw new FormatException("Invalid JWT format. Expected at least two segments.");
+
+        return parts[1];
+    }
+
+    private static Dictionary<string, JsonElement> DeserializePayload(string payload)
+    {
+        var jsonBytes = ParseBase64WithoutPadding(payload);
+
+        return JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes)
+            ?? throw new InvalidOperationException("Failed to parse JWT payload.");
+    }
+
+    /// <summary>
+    /// Decodes a Base64Url-encoded string, adding padding if necessary.
+    /// </summary>
     private static byte[] ParseBase64WithoutPadding(string base64)
     {
-        int padding = 4 - base64.Length % 4;
-        if (padding < 4)
-        {
-            base64 = base64.PadRight(base64.Length + padding, '=');
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(base64);
 
-        return Convert.FromBase64String(base64);
+        // JWT uses Base64Url encoding, replace URL-safe chars
+        string normalized = base64
+            .Replace('-', '+')
+            .Replace('_', '/');
+
+        // Add missing padding if needed
+        int padding = normalized.Length % 4;
+        if (padding > 0)
+            normalized = normalized.PadRight(normalized.Length + (4 - padding), '=');
+
+        return Convert.FromBase64String(normalized);
+    }
+
+
+    private static IEnumerable<Claim> ExtractRoleClaims(JsonElement rolesElement)
+    {
+        if (rolesElement.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var role in rolesElement.EnumerateArray())
+            {
+                var roleName = role.GetString();
+                if (!string.IsNullOrWhiteSpace(roleName))
+                    yield return new Claim(ClaimTypes.Role, roleName);
+            }
+        }
+        else if (rolesElement.ValueKind == JsonValueKind.String)
+        {
+            var roleName = rolesElement.GetString();
+            if (!string.IsNullOrWhiteSpace(roleName))
+                yield return new Claim(ClaimTypes.Role, roleName);
+        }
     }
 }

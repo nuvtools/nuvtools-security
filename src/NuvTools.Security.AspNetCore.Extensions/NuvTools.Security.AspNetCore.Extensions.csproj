@@ -9,7 +9,7 @@
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>NuvTools.Security.AspNetCore.Extensions.snk</AssemblyOriginatorKeyFile>
 		<Description>Common library for security purposes in ASP.NET Core.</Description>
-		<Version>9.2.0</Version>
+		<Version>9.5.0</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -43,8 +43,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.10" />
 	</ItemGroup>
 
 	<ItemGroup>

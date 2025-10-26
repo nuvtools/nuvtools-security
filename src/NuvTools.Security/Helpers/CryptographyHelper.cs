@@ -3,23 +3,41 @@ using System.Text;
 
 namespace NuvTools.Security.Helpers;
 
-public class CryptographyHelper
+/// <summary>
+/// Provides helper methods for computing cryptographic hashes.
+/// </summary>
+public static class CryptographyHelper
 {
     /// <summary>
-    /// Will return a 64-character string (32 bytes represented in hex).
+    /// Supported hashing algorithms.
+    /// </summary>
+    public enum HashAlgorithmType
+    {
+        SHA256,
+        SHA512
+    }
+
+    /// <summary>
+    /// Computes the cryptographic hash of a string using the specified algorithm.
     /// </summary>
     /// <param name="value">The input string to be hashed. If null or empty, an empty string is returned.</param>
-    /// <returns>A 64-character lowercase hexadecimal representation of the SHA-256 hash of the input string.</returns>
-
-    public static string ComputeSHA256Hash(string value)
+    /// <param name="algorithm">The hash algorithm to use. Defaults to SHA256.</param>
+    /// <returns>
+    /// A lowercase hexadecimal representation of the computed hash.
+    /// </returns>
+    public static string ComputeHash(string? value, HashAlgorithmType algorithm = HashAlgorithmType.SHA256)
     {
-        if (string.IsNullOrEmpty(value)) return string.Empty;
+        if (string.IsNullOrEmpty(value))
+            return string.Empty;
 
         byte[] bytes = Encoding.UTF8.GetBytes(value);
+        byte[] hashBytes = algorithm switch
+        {
+            HashAlgorithmType.SHA512 => SHA512.HashData(bytes),
+            _ => SHA256.HashData(bytes)
+        };
 
-        byte[] hashBytes = SHA256.HashData(bytes);
-
-        StringBuilder builder = new();
+        StringBuilder builder = new(hashBytes.Length * 2);
         foreach (byte b in hashBytes)
         {
             builder.Append(b.ToString("x2"));
@@ -27,4 +45,14 @@ public class CryptographyHelper
 
         return builder.ToString();
     }
+
+    /// <summary>
+    /// Computes a SHA-256 hash for the given string.
+    /// </summary>
+    public static string ComputeSHA256Hash(string? value) => ComputeHash(value, HashAlgorithmType.SHA256);
+
+    /// <summary>
+    /// Computes a SHA-512 hash for the given string.
+    /// </summary>
+    public static string ComputeSHA512Hash(string? value) => ComputeHash(value, HashAlgorithmType.SHA512);
 }
