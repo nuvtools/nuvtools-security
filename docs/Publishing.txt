@@ -1,3 +1,0 @@
-nuget.exe push -Source "nuvtools" -ApiKey az NuvTools.Security.Models.7.0.0.nupkg
-nuget.exe push -Source "nuvtools" -ApiKey az NuvTools.Security.7.0.0.nupkg
-nuget.exe push -Source "nuvtools" -ApiKey az NuvTools.Security.AspNetCore.7.0.0.nupkg
