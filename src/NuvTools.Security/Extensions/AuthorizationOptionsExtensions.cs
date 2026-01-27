@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
-namespace NuvTools.Security.AspNetCore.Extensions;
+namespace NuvTools.Security.Extensions;
 
 /// <summary>
 /// Provides extension methods for configuring authorization policies based on specific claims.

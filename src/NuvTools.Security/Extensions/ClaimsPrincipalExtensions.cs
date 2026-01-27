@@ -1,5 +1,6 @@
 ﻿using NuvTools.Security.Models;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using ClaimTypes = System.Security.Claims.ClaimTypes;
 
 namespace NuvTools.Security.Extensions;
@@ -11,8 +12,35 @@ namespace NuvTools.Security.Extensions;
 /// These extensions simplify the process of extracting common user identity information from claims,
 /// handling multiple claim type variations and validating values where appropriate.
 /// </remarks>
-public static class ClaimsPrincipalExtensions
+public static partial class ClaimsPrincipalExtensions
 {
+    #region Email
+
+    /// <summary>
+    /// Regex pattern for strict e-mail address validation, supporting domain names and IPv4 formats.
+    /// </summary>
+    private const string EMAIL_ADDRESS =
+        @"^([a-z0-9_\-])([a-z0-9_\-\.]*)@(" +
+            @"(\[((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}" +
+              @"(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\])|" + // IPv4 literal
+            @"((([a-z0-9\-]+)\.)+([a-z]{2,}))" +                         // domain
+        @")$";
+
+    /// <summary>
+    /// Compiled and invariant regex instance for e-mail validation.
+    /// </summary>
+    [GeneratedRegex(EMAIL_ADDRESS, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex EmailRegex();
+
+    /// <summary>
+    /// Validate the e-mail address.
+    /// </summary>
+    /// <param name="value">E-mail address</param>
+    /// <returns></returns>
+    private static bool IsEmail(this string value) => EmailRegex().IsMatch(value);
+
+    #endregion
+
     /// <summary>
     /// Gets the unique identifier of the user from either the NameIdentifier or Sub claim.
     /// </summary>
@@ -133,7 +161,7 @@ public static class ClaimsPrincipalExtensions
                  ?? user.FindFirst(ClaimConstants.PreferredUsername)?.Value
                  ?? user.FindFirst(ClaimConstants.UniqueName)?.Value;
 
-        return !string.IsNullOrEmpty(email) && Validation.Validator.IsEmail(email) ? email : null;
+        return !string.IsNullOrEmpty(email) && email.IsEmail() ? email : null;
     }
 
     /// <summary>

@@ -24,8 +24,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NuvTools.Validation" Version="[10.0.2,10.1.0)" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="[8.15.0,8.16.0)" />
+		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="[10.0.2,10.1.0)" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -4,7 +4,6 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src\NuvTools.Security.AspNetCore.Blazor\NuvTools.Security.AspNetCore.Blazor.csproj" />
-    <Project Path="src\NuvTools.Security.AspNetCore.Extensions\NuvTools.Security.AspNetCore.Extensions.csproj" />
     <Project Path="src\NuvTools.Security.AspNetCore\NuvTools.Security.AspNetCore.csproj" />
     <Project Path="src\NuvTools.Security\NuvTools.Security.csproj" />
   </Folder>
