@@ -4,21 +4,20 @@
 		<TargetFrameworks>net8;net9;net10.0</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Nuv Tools</Authors>
-		<Copyright>Copyright © 2025 Nuv Tools</Copyright>
+		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
-		<Description>Common library for security purposes in ASP.NET Core.</Description>
-		<Version>10.0.0</Version>
+		<Description>Security configuration and authenticated user services for ASP.NET Core applications.</Description>
+		<Version>10.0.2</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
-		<DelaySign>False</DelaySign>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<RepositoryUrl>https://github.com/nuvtools/nuvtools-security</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>Nuv Tools Security AspNetCore</PackageTags>
+		<PackageTags>NuvTools Security AspNetCore Authentication</PackageTags>
 		<ImplicitUsings>true</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
@@ -41,7 +40,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="[10.0.2,10.1.0)" />
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
 

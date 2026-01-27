@@ -7,21 +7,20 @@
 
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Nuv Tools</Authors>
-		<Copyright>Copyright © 2025 Nuv Tools</Copyright>
+		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
-		<Description>A helper library for managing authentication and security-related tasks in Blazor applications.</Description>
-		<Version>10.0.0</Version>
+		<Description>Authentication state providers for Blazor applications with JWT and OIDC support.</Description>
+		<Version>10.0.2</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
-		<DelaySign>False</DelaySign>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<RepositoryUrl>https://github.com/nuvtools/nuvtools-security</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>Nuv Tools Security AspNetCore Blazor</PackageTags>
+		<PackageTags>NuvTools Security Blazor Authentication OIDC</PackageTags>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -42,13 +41,13 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.11" Condition="'$(TargetFramework)' == 'net9'" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.22" Condition="'$(TargetFramework)' == 'net8'" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="9.0.11" Condition="'$(TargetFramework)' == 'net9'" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="8.0.22" Condition="'$(TargetFramework)' == 'net8'" />
+		<PackageReference Include="Blazored.LocalStorage" Version="[4.5.0,4.6.0)" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="[10.0.2,10.1.0)" Condition="'$(TargetFramework)' == 'net10.0'" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="[9.0.12,9.1.0)" Condition="'$(TargetFramework)' == 'net9'" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="[8.0.23,8.1.0)" Condition="'$(TargetFramework)' == 'net8'" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="[10.0.2,10.1.0)" Condition="'$(TargetFramework)' == 'net10.0'" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="[9.0.12,9.1.0)" Condition="'$(TargetFramework)' == 'net9'" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="[8.0.23,8.1.0)" Condition="'$(TargetFramework)' == 'net8'" />
 	</ItemGroup>
 
 	<ItemGroup>

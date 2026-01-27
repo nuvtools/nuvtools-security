@@ -24,7 +24,7 @@ A comprehensive suite of .NET libraries for implementing security features in mo
 
 ### NuvTools.Security
 
-Core library providing fundamental security utilities for any .NET application.
+Core security library providing JWT token handling, cryptography utilities, and ClaimsPrincipal extensions.
 
 **Key Components:**
 - `JwtHelper` - Generate, parse, and validate JWT tokens
@@ -38,7 +38,7 @@ dotnet add package NuvTools.Security
 
 ### NuvTools.Security.AspNetCore
 
-ASP.NET Core integration for security configuration and current user access.
+Security configuration and authenticated user services for ASP.NET Core applications.
 
 **Key Components:**
 - `SecurityConfigurationSection` - JWT configuration model (Issuer, Audience, SecretKey)
@@ -51,7 +51,7 @@ dotnet add package NuvTools.Security.AspNetCore
 
 ### NuvTools.Security.AspNetCore.Blazor
 
-Blazor WebAssembly authentication state providers for manual and OIDC authentication.
+Authentication state providers for Blazor applications with JWT and OIDC support.
 
 **Key Components:**
 - `ManualAuthenticationStateProvider` - JWT-based auth with local storage
@@ -63,7 +63,7 @@ dotnet add package NuvTools.Security.AspNetCore.Blazor
 
 ### NuvTools.Security.AspNetCore.Extensions
 
-Authorization policy builder extensions for claims-based access control.
+Authorization policy builder extensions for ASP.NET Core.
 
 **Key Components:**
 - `AuthorizationOptionsExtensions` - Fluent API for permission and claim-based policies
