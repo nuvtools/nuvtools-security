@@ -1,80 +1,65 @@
-# NuvTools.Security
-
-A comprehensive suite of .NET libraries for implementing security features in modern applications, including JWT authentication, cryptography, claims-based authorization, and Blazor authentication state management.
+# NuvTools Security Libraries
 
 [![NuGet](https://img.shields.io/nuget/v/NuvTools.Security.svg)](https://www.nuget.org/packages/NuvTools.Security/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Features
+A suite of .NET libraries for implementing security features in ASP.NET Core and Blazor applications, including JWT authentication, cryptography, claims-based authorization, and authentication state management. These libraries target modern .NET platforms, including .NET 8, .NET 9, and .NET 10.
 
-- 🔐 **JWT Token Management** - Generate, validate, and parse JWT tokens with built-in refresh token support
-- 🔒 **Cryptography Helpers** - SHA256 and SHA512 hashing utilities
-- 👤 **Claims Principal Extensions** - Easy extraction of user information from claims with multiple fallback sources
-- ⚙️ **ASP.NET Core Integration** - Configuration models and current user service
-- 🎨 **Blazor Authentication** - Manual and OIDC-based authentication state providers
-- 🛡️ **Authorization Extensions** - Fluent API for building permission-based policies
-
-## Supported Frameworks
-
-- .NET 8.0
-- .NET 9.0
-- .NET 10.0
-
-## Libraries Overview
+## Libraries
 
 ### NuvTools.Security
 
-Core security library providing JWT token handling, cryptography utilities, and ClaimsPrincipal extensions.
+Core security library providing JWT token handling, cryptography utilities, claims extensions, and authorization policy builders.
 
-**Key Components:**
-- `JwtHelper` - Generate, parse, and validate JWT tokens
-- `CryptographyHelper` - Compute SHA256/SHA512 hashes
-- `ClaimsPrincipalExtensions` - Extract user info from claims (email, name, custom attributes)
-- `ClaimExtensions` - Build claims collections with permission support
-
-```bash
-dotnet add package NuvTools.Security
-```
+**Key Features:**
+- **JWT Helper**: Generate, parse, validate JWT tokens and refresh tokens
+- **Cryptography Helper**: SHA256 and SHA512 hashing utilities
+- **ClaimsPrincipal Extensions**: Easy extraction of user information from claims with multiple fallback sources
+- **Claim Extensions**: Build claims collections with permission support
+- **Authorization Extensions**: Fluent API for building permission-based policies
 
 ### NuvTools.Security.AspNetCore
 
 Security configuration and authenticated user services for ASP.NET Core applications.
 
-**Key Components:**
-- `SecurityConfigurationSection` - JWT configuration model (Issuer, Audience, SecretKey)
-- `CurrentUserService` - Access current authenticated user and connection details
-- `ServiceCollectionExtensions` - DI configuration helpers
-
-```bash
-dotnet add package NuvTools.Security.AspNetCore
-```
+**Key Features:**
+- **Security Configuration**: JWT configuration model (Issuer, Audience, SecretKey) with IOptions pattern
+- **Current User Service**: Access current authenticated user and connection details via dependency injection
 
 ### NuvTools.Security.AspNetCore.Blazor
 
 Authentication state providers for Blazor applications with JWT and OIDC support.
 
-**Key Components:**
-- `ManualAuthenticationStateProvider` - JWT-based auth with local storage
-- `OidcAuthenticationStateProvider` - OIDC/OAuth authentication integration
+**Key Features:**
+- **Manual Authentication State Provider**: JWT-based auth with local storage and automatic token expiration handling
+- **OIDC Authentication State Provider**: OpenID Connect authentication integration
+
+## Installation
+
+Install via NuGet Package Manager:
 
 ```bash
+# For core security features (JWT, cryptography, claims)
+dotnet add package NuvTools.Security
+
+# For ASP.NET Core integration (includes NuvTools.Security)
+dotnet add package NuvTools.Security.AspNetCore
+
+# For Blazor authentication state providers
 dotnet add package NuvTools.Security.AspNetCore.Blazor
 ```
 
-### NuvTools.Security.AspNetCore.Extensions
+Or via Package Manager Console:
 
-Authorization policy builder extensions for ASP.NET Core.
-
-**Key Components:**
-- `AuthorizationOptionsExtensions` - Fluent API for permission and claim-based policies
-
-```bash
-dotnet add package NuvTools.Security.AspNetCore.Extensions
+```powershell
+Install-Package NuvTools.Security
+Install-Package NuvTools.Security.AspNetCore
+Install-Package NuvTools.Security.AspNetCore.Blazor
 ```
 
 ## Quick Start
 
-### 1. JWT Token Generation and Validation
+### JWT Token Generation and Validation
 
 ```csharp
 using NuvTools.Security.Helpers;
@@ -104,9 +89,12 @@ bool isExpired = JwtHelper.IsTokenExpired(token);
 
 // Generate a refresh token
 string refreshToken = JwtHelper.GenerateRefreshToken();
+
+// Extract principal from expired token (for refresh flow)
+var principal = JwtHelper.GetPrincipalFromExpiredToken(token, "your-secret-key");
 ```
 
-### 2. Cryptography and Hashing
+### Cryptography and Hashing
 
 ```csharp
 using NuvTools.Security.Helpers;
@@ -124,7 +112,7 @@ string hash = CryptographyHelper.ComputeHash(
 );
 ```
 
-### 3. Claims Principal Extensions
+### Claims Principal Extensions
 
 ```csharp
 using NuvTools.Security.Extensions;
@@ -135,8 +123,8 @@ public class UserController : ControllerBase
     public IActionResult GetProfile()
     {
         // Extract user information with automatic fallback
-        var userId = User.GetId();                    // NameIdentifier or Sub
-        var email = User.GetEmail();                   // Email, upn, preferred_username, etc.
+        var userId = User.GetId();           // NameIdentifier or Sub
+        var email = User.GetEmail();         // Email, upn, preferred_username, etc.
         var name = User.GetName();
         var givenName = User.GetGivenName();
         var familyName = User.GetFamilyName();
@@ -153,7 +141,66 @@ public class UserController : ControllerBase
 }
 ```
 
-### 4. ASP.NET Core Configuration
+### Building Claims Collections
+
+```csharp
+using NuvTools.Security.Extensions;
+
+// Add individual permissions
+var claims = new List<Claim>();
+claims.AddPermission("users.read");
+claims.AddPermission("users.write");
+
+// Add all permissions from a static class
+public static class UserPermissions
+{
+    public const string Read = "users.read";
+    public const string Write = "users.write";
+    public const string Delete = "users.delete";
+}
+
+claims.AddPermissionByClass(typeof(UserPermissions));
+
+// Add claims from a class with custom claim type
+claims.AddByClass("custom-claim-type", typeof(MyClaimsClass));
+```
+
+### Authorization Policies with Permissions
+
+```csharp
+using NuvTools.Security.Extensions;
+
+builder.Services.AddAuthorization(options =>
+{
+    // Add policy requiring specific permission claim
+    options.AddPolicyWithRequiredPermissionClaim(
+        "CanManageUsers",
+        "users.write", "users.delete");
+
+    // Add policy with custom claim type and values
+    options.AddPolicyWithRequiredClaim(
+        "AdminOnly",
+        "role",
+        "Admin", "SuperAdmin");
+
+    // Add policy with multiple different claims
+    options.AddPolicyWithRequiredClaim(
+        "ComplexPolicy",
+        new Claim(NuvTools.Security.Models.ClaimTypes.Permission, "reports.read"),
+        new Claim("department", "IT")
+    );
+});
+
+// In controller
+[Authorize(Policy = "CanManageUsers")]
+public class UserManagementController : ControllerBase
+{
+    [HttpPost]
+    public IActionResult CreateUser() { /* ... */ }
+}
+```
+
+### ASP.NET Core Configuration
 
 **appsettings.json:**
 ```json
@@ -185,36 +232,32 @@ var app = builder.Build();
 
 **Using CurrentUserService:**
 ```csharp
-public class MyService
+public class MyService(CurrentUserService currentUser)
 {
-    private readonly CurrentUserService _currentUser;
-
-    public MyService(CurrentUserService currentUser)
-    {
-        _currentUser = currentUser;
-    }
-
     public void DoSomething()
     {
-        var userId = _currentUser.NameIdentifier;
-        var ipAddress = _currentUser.RemoteIpAddress;
-        var fullAddress = _currentUser.FullRemoteAddress;
-        var claims = _currentUser.Claims;
+        var userId = currentUser.NameIdentifier;
+        var ipAddress = currentUser.RemoteIpAddress;
+        var fullAddress = currentUser.FullRemoteAddress;
+        var claims = currentUser.Claims;
     }
 }
 ```
 
-### 5. Blazor Manual Authentication
+### Blazor Manual Authentication
 
 **Program.cs:**
 ```csharp
 using NuvTools.Security.AspNetCore.Blazor;
+using NuvTools.AspNetCore.Blazor.Extensions;
 using Microsoft.AspNetCore.Components.Authorization;
-using Blazored.LocalStorage;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-builder.Services.AddBlazoredLocalStorage();
+// Register local storage service (required by ManualAuthenticationStateProvider)
+builder.Services.AddLocalStorageService();
+
+// Register authentication
 builder.Services.AddScoped<AuthenticationStateProvider, ManualAuthenticationStateProvider>();
 builder.Services.AddAuthorizationCore();
 
@@ -243,93 +286,12 @@ private async Task LogoutAsync()
 }
 ```
 
-### 6. Authorization Policies with Permissions
-
-**Program.cs:**
-```csharp
-using NuvTools.Security.AspNetCore.Extensions;
-using NuvTools.Security.Models;
-
-builder.Services.AddAuthorization(options =>
-{
-    // Add policy requiring specific permission claim
-    options.AddPolicyWithRequiredPermissionClaim("CanManageUsers", "users.write", "users.delete");
-
-    // Add policy with custom claim type and values
-    options.AddPolicyWithRequiredClaim("AdminOnly", "role", "Admin", "SuperAdmin");
-
-    // Add policy with multiple different claims
-    options.AddPolicyWithRequiredClaim("ComplexPolicy",
-        new Claim(ClaimTypes.Permission, "reports.read"),
-        new Claim("department", "IT")
-    );
-});
-```
-
-**Controller:**
-```csharp
-[Authorize(Policy = "CanManageUsers")]
-public class UserManagementController : ControllerBase
-{
-    [HttpPost]
-    public IActionResult CreateUser() { /* ... */ }
-}
-```
-
-### 7. Building Claims Collections
-
-```csharp
-using NuvTools.Security.Extensions;
-using NuvTools.Security.Models;
-
-// Add individual permissions
-var claims = new List<Claim>();
-claims.AddPermission("users.read");
-claims.AddPermission("users.write");
-
-// Add all permissions from a static class
-public static class UserPermissions
-{
-    public const string Read = "users.read";
-    public const string Write = "users.write";
-    public const string Delete = "users.delete";
-}
-
-claims.AddPermissionByClass(typeof(UserPermissions));
-
-// Add claims from a class with custom claim type
-claims.AddByClass("custom-claim-type", typeof(MyClaimsClass));
-```
-
-## Advanced Usage
-
-### Refresh Token Flow
-
-```csharp
-using NuvTools.Security.Helpers;
-
-// When access token expires, get principal from expired token
-var principal = JwtHelper.GetPrincipalFromExpiredToken(
-    expiredToken,
-    "your-secret-key"
-);
-
-// Validate refresh token from database
-// If valid, generate new access token
-var newAccessToken = JwtHelper.Generate(
-    key: "your-secret-key",
-    issuer: "your-app",
-    audience: "your-app-users",
-    claims: principal.Claims,
-    expires: DateTime.UtcNow.AddHours(1)
-);
-```
-
 ### OIDC Authentication in Blazor
 
 **Program.cs:**
 ```csharp
 using NuvTools.Security.AspNetCore.Blazor;
+using Microsoft.AspNetCore.Components.Authorization;
 
 builder.Services.AddOidcAuthentication(options =>
 {
@@ -340,16 +302,50 @@ builder.Services.AddOidcAuthentication(options =>
 builder.Services.AddScoped<AuthenticationStateProvider, OidcAuthenticationStateProvider>();
 ```
 
-## Repository Information
+## Features
 
-- **Repository:** [https://github.com/nuvtools/nuvtools-security](https://github.com/nuvtools/nuvtools-security)
-- **License:** MIT
-- **Authors:** Nuv Tools
+- **Multi-targeting**: Compatible with .NET 8, .NET 9, and .NET 10
+- **Comprehensive documentation**: Full XML documentation for IntelliSense
+- **Modular design**: Use only what you need
+- **Modern C# features**: Uses nullable reference types, implicit usings, and primary constructors
+
+## Building from Source
+
+This project uses the modern `.slnx` solution format (Visual Studio 2022 v17.11+).
+
+```bash
+# Clone the repository
+git clone https://github.com/nuvtools/nuvtools-security.git
+cd nuvtools-security
+
+# Build the solution
+dotnet build NuvTools.Security.slnx
+
+# Run tests
+dotnet test NuvTools.Security.slnx
+
+# Create release packages
+dotnet build NuvTools.Security.slnx --configuration Release
+```
+
+## Requirements
+
+- .NET 8.0 SDK or higher
+- Visual Studio 2022 (v17.11+) or Visual Studio Code with C# extension
+- NuvTools.AspNetCore.Blazor (for NuvTools.Security.AspNetCore.Blazor)
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues and pull requests.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Links
+
+- [GitHub Repository](https://github.com/nuvtools/nuvtools-security)
+- [NuGet Package - NuvTools.Security](https://www.nuget.org/packages/NuvTools.Security/)
+- [NuGet Package - NuvTools.Security.AspNetCore](https://www.nuget.org/packages/NuvTools.Security.AspNetCore/)
+- [NuGet Package - NuvTools.Security.AspNetCore.Blazor](https://www.nuget.org/packages/NuvTools.Security.AspNetCore.Blazor/)
+- [Official Website](https://nuvtools.com)
