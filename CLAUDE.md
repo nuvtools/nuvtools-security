@@ -72,9 +72,14 @@ Core security library providing JWT, cryptography, and claims utilities.
 - `GenerateRefreshToken()` - Creates secure random Base64 refresh tokens
 - `IsTokenExpired()` - Checks token expiration via 'exp' claim
 
-**CryptographyHelper**
+**HashHelper**
 - `ComputeSHA256Hash()` / `ComputeSHA512Hash()` - Computes hashes returning lowercase hex strings
 - `ComputeHash()` - Generic method with algorithm selection via `HashAlgorithmType` enum
+
+**AesEncryptionHelper**
+- `EncryptToString()` / `EncryptToBytes()` - AES encryption (format: IV (16 bytes) + ciphertext, SHA-256-derived key)
+- `DecryptToString()` / `DecryptToBytes()` - AES decryption; non-Base64 input is returned as-is (legacy fallback)
+- AES key size selectable via the `SymmetricAlgorithmType` enum (AES128 / AES192 / AES256)
 
 #### Extensions (`NuvTools.Security.Extensions`)
 
@@ -141,7 +146,8 @@ Blazor authentication state providers.
 
 The test project uses NUnit 4.x and targets net10.0. Test files follow the naming convention `{ComponentName}Tests.cs`:
 - ClaimsPrincipalExtensionsTests.cs
-- CryptographyHelperTests.cs
+- HashHelperTests.cs
+- AesEncryptionHelperTests.cs
 - JwtHelperTests.cs
 
 ## Code Style

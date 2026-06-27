@@ -100,15 +100,34 @@ var principal = JwtHelper.GetPrincipalFromExpiredToken(token, "your-secret-key")
 using NuvTools.Security.Helpers;
 
 // Compute SHA256 hash
-string hash256 = CryptographyHelper.ComputeSHA256Hash("sensitive-data");
+string hash256 = HashHelper.ComputeSHA256Hash("sensitive-data");
 
 // Compute SHA512 hash
-string hash512 = CryptographyHelper.ComputeSHA512Hash("sensitive-data");
+string hash512 = HashHelper.ComputeSHA512Hash("sensitive-data");
 
 // Generic method with algorithm selection
-string hash = CryptographyHelper.ComputeHash(
+string hash = HashHelper.ComputeHash(
     "data",
-    CryptographyHelper.HashAlgorithmType.SHA512
+    HashHelper.HashAlgorithmType.SHA512
+);
+```
+
+### AES Symmetric Encryption
+
+```csharp
+using NuvTools.Security.Helpers;
+
+// Encrypt to a Base64 string (format: IV (16 bytes) + ciphertext, SHA-256-derived key)
+string cipher = AesEncryptionHelper.EncryptToString("sensitive-data", "your-secret-key");
+
+// Decrypt back to plain text (non-Base64 input is returned as-is for legacy data)
+string plain = AesEncryptionHelper.DecryptToString(cipher, "your-secret-key");
+
+// Choose the AES key size explicitly
+string cipher128 = AesEncryptionHelper.EncryptToString(
+    "data",
+    "your-secret-key",
+    AesEncryptionHelper.SymmetricAlgorithmType.AES128
 );
 ```
 

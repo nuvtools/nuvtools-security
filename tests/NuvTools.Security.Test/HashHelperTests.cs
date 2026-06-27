@@ -1,10 +1,10 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using NuvTools.Security.Helpers;
 
 namespace NuvTools.Security.Test;
 
 [TestFixture]
-public class CryptographyHelperTests
+public class HashHelperTests
 {
     [Test]
     public void ComputeSHA256Hash_ShouldReturnCorrectHash_ForKnownInput()
@@ -14,7 +14,7 @@ public class CryptographyHelperTests
         const string expectedHash = "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9";
 
         // Act
-        string result = CryptographyHelper.ComputeSHA256Hash(input);
+        string result = HashHelper.ComputeSHA256Hash(input);
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedHash));
@@ -30,7 +30,7 @@ public class CryptographyHelperTests
             "989dd35bc5ff499670da34255b45b0cfd830e81f605dcf7dc5542e93ae9cd76f";
 
         // Act
-        string result = CryptographyHelper.ComputeSHA512Hash(input);
+        string result = HashHelper.ComputeSHA512Hash(input);
 
         // Assert
         Assert.That(result, Is.EqualTo(expectedHash));
@@ -43,8 +43,8 @@ public class CryptographyHelperTests
         string input = "test";
 
         // Act
-        string hashDefault = CryptographyHelper.ComputeHash(input);
-        string hashExplicit = CryptographyHelper.ComputeSHA256Hash(input);
+        string hashDefault = HashHelper.ComputeHash(input);
+        string hashExplicit = HashHelper.ComputeSHA256Hash(input);
 
         // Assert
         Assert.That(hashDefault, Is.EqualTo(hashExplicit));
@@ -55,7 +55,7 @@ public class CryptographyHelperTests
     public void ComputeSHA256Hash_ShouldReturnEmpty_ForNullOrEmptyInput(string? input)
     {
         // Act
-        string result = CryptographyHelper.ComputeSHA256Hash(input);
+        string result = HashHelper.ComputeSHA256Hash(input);
 
         // Assert
         Assert.That(result, Is.Empty);
@@ -66,7 +66,7 @@ public class CryptographyHelperTests
     public void ComputeSHA256Hash_ShouldReturn64CharHex_ForValidInput(string input, int expectedLength)
     {
         // Act
-        string result = CryptographyHelper.ComputeSHA256Hash(input);
+        string result = HashHelper.ComputeSHA256Hash(input);
 
         // Assert
         Assert.Multiple(() =>
@@ -81,7 +81,7 @@ public class CryptographyHelperTests
     public void ComputeSHA512Hash_ShouldReturn128CharHex_ForValidInput(string input, int expectedLength)
     {
         // Act
-        string result = CryptographyHelper.ComputeSHA512Hash(input);
+        string result = HashHelper.ComputeSHA512Hash(input);
 
         // Assert
         Assert.Multiple(() =>
@@ -98,8 +98,8 @@ public class CryptographyHelperTests
         string input = "consistent";
 
         // Act
-        string first = CryptographyHelper.ComputeSHA256Hash(input);
-        string second = CryptographyHelper.ComputeSHA256Hash(input);
+        string first = HashHelper.ComputeSHA256Hash(input);
+        string second = HashHelper.ComputeSHA256Hash(input);
 
         // Assert
         Assert.That(first, Is.EqualTo(second));
@@ -112,8 +112,8 @@ public class CryptographyHelperTests
         string input = "sameInput";
 
         // Act
-        string hash256 = CryptographyHelper.ComputeSHA256Hash(input);
-        string hash512 = CryptographyHelper.ComputeSHA512Hash(input);
+        string hash256 = HashHelper.ComputeSHA256Hash(input);
+        string hash512 = HashHelper.ComputeSHA512Hash(input);
 
         // Assert
         Assert.That(hash256, Is.Not.EqualTo(hash512));
