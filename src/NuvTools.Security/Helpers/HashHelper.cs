@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace NuvTools.Security.Helpers;
@@ -6,7 +6,7 @@ namespace NuvTools.Security.Helpers;
 /// <summary>
 /// Provides helper methods for computing cryptographic hashes.
 /// </summary>
-public static class CryptographyHelper
+public static class HashHelper
 {
     /// <summary>
     /// Supported hashing algorithms.

@@ -11,11 +11,11 @@
 public static class ClaimTypes
 {
     /// <summary>
-    /// The URI for a claim that specifies the permission, http://schemas.nuv.tools/ws/2021/10/identity/claims/permission.
+    /// The URI for a claim that specifies the permission, http://schemas.nuvtools.com/ws/2026/06/identity/claims/permission.
     /// </summary>
     /// <remarks>
     /// Use this claim type when defining permission-based authorization policies with
     /// the AuthorizationOptionsExtensions class from NuvTools.Security.AspNetCore.Extensions.
     /// </remarks>
-    public const string Permission = "http://schemas.nuv.tools/ws/2021/10/identity/claims/permission";
+    public const string Permission = "http://schemas.nuvtools.com/ws/2026/06/identity/claims/permission";
 }
