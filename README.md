@@ -40,7 +40,7 @@ Authentication state providers for Blazor applications with JWT and OIDC support
 **Key Features:**
 - **Manual Authentication State Provider**: JWT-based auth with local storage and automatic token expiration handling
 - **OIDC Authentication State Provider**: OpenID Connect authentication integration
-- **Captcha Component**: Invisible by default, rendering the "I'm not a robot" checkbox only on step-up
+- **NuvCaptcha Component**: Invisible by default, rendering the "I'm not a robot" checkbox only on step-up
 
 ## Installation
 
@@ -369,10 +369,10 @@ services.AddCaptcha(builder.Configuration);
 ```razor
 @using NuvTools.Security.AspNetCore.Blazor.Captcha
 
-<Captcha @ref="_captcha" />
+<NuvCaptcha @ref="_captcha" />
 
 @code {
-    private Captcha _captcha = default!;
+    private NuvCaptcha _captcha = default!;
 
     private async Task SubmitAsync()
     {

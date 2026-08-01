@@ -14,7 +14,7 @@ namespace NuvTools.Security.AspNetCore.Blazor.Captcha;
 /// renders the <b>checkbox</b> challenge (checkbox key) as a step-up. Driven by
 /// <see cref="CaptchaOptions"/>, registered with <c>AddCaptcha</c>.
 /// </remarks>
-public partial class Captcha : IAsyncDisposable
+public partial class NuvCaptcha : IAsyncDisposable
 {
     [Inject] private IOptions<CaptchaOptions> Options { get; set; } = default!;
     [Inject] private ICaptchaService CaptchaService { get; set; } = default!;

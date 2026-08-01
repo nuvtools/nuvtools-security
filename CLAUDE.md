@@ -175,7 +175,7 @@ Blazor authentication state providers and the client half of the adaptive CAPTCH
 
 #### CAPTCHA (`NuvTools.Security.AspNetCore.Blazor.Captcha`)
 
-**Captcha component**
+**NuvCaptcha component** (`NuvCaptcha.razor` / `NuvCaptcha.razor.cs`)
 - Invisible by default (score key); renders the "I'm not a robot" checkbox only on step-up
 - `GetTokenAsync()` before submitting, `HandleStepUpAsync(result)` on the response, `ResetAsync()` for a retry (the token is single-use)
 - `Class` parameter styles the element hosting the widget — the package ships no CSS of its own
