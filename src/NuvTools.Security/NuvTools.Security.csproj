@@ -7,8 +7,8 @@
 		<Authors>Nuv Tools</Authors>
 		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
-		<Description>Core security library providing JWT token handling, cryptography utilities, and ClaimsPrincipal extensions.</Description>
-		<Version>10.2.10</Version>
+		<Description>Core security library providing JWT token handling, cryptography utilities, ClaimsPrincipal extensions, and the shared CAPTCHA contract.</Description>
+		<Version>10.3.0</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -18,7 +18,7 @@
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>NuvTools Security JWT Cryptography Claims</PackageTags>
+		<PackageTags>NuvTools Security JWT Cryptography Claims Captcha reCAPTCHA</PackageTags>
 		<ImplicitUsings>true</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>

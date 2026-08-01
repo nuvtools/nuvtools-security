@@ -17,22 +17,30 @@ Core security library providing JWT token handling, cryptography utilities, clai
 - **ClaimsPrincipal Extensions**: Easy extraction of user information from claims with multiple fallback sources
 - **Claim Extensions**: Build claims collections with permission support
 - **Authorization Extensions**: Fluent API for building permission-based policies
+- **CAPTCHA Contract**: Options, header constants and the `ICaptchaVerifier` abstraction shared by client and server
+
+> Carries no ASP.NET Core framework reference, so it is safe to consume from Blazor WebAssembly.
 
 ### NuvTools.Security.AspNetCore
 
-Security configuration and authenticated user services for ASP.NET Core applications.
+Security configuration, authenticated user services and adaptive CAPTCHA verification for ASP.NET Core applications.
 
 **Key Features:**
 - **Security Configuration**: JWT configuration model (Issuer, Audience, SecretKey) with IOptions pattern
 - **Current User Service**: Access current authenticated user and connection details via dependency injection
+- **Adaptive CAPTCHA Filter**: `[ValidateCaptcha]` gates public endpoints — invisible score check by default, escalating to a checkbox challenge when the risk is high
+- **reCAPTCHA Enterprise Verifier**: creates the assessment on Google Cloud; the API key never leaves the server
+
+> Requires the ASP.NET Core shared framework. Do **not** reference it from a WebAssembly project — use `NuvTools.Security` for the shared contract instead.
 
 ### NuvTools.Security.AspNetCore.Blazor
 
-Authentication state providers for Blazor applications with JWT and OIDC support.
+Authentication state providers for Blazor applications with JWT and OIDC support, plus the client half of the adaptive CAPTCHA.
 
 **Key Features:**
 - **Manual Authentication State Provider**: JWT-based auth with local storage and automatic token expiration handling
 - **OIDC Authentication State Provider**: OpenID Connect authentication integration
+- **Captcha Component**: Invisible by default, rendering the "I'm not a robot" checkbox only on step-up
 
 ## Installation
 
@@ -320,6 +328,76 @@ builder.Services.AddOidcAuthentication(options =>
 // Use custom OIDC provider
 builder.Services.AddScoped<AuthenticationStateProvider, OidcAuthenticationStateProvider>();
 ```
+
+### Adaptive CAPTCHA
+
+Protects public endpoints (login, password reset, public queries) from automated abuse. A **score** key runs invisibly on every submission; when the risk is high the client escalates to a **checkbox** challenge.
+
+**Server** — `NuvTools.Security.AspNetCore`:
+
+```csharp
+// Program.cs
+services.AddCaptcha(builder.Configuration);
+
+// Controller
+[HttpPost("forgotpassword")]
+[ValidateCaptcha]
+public async Task<IActionResult> ForgotPassword(ForgotPasswordModel model) { ... }
+```
+
+```json
+{
+  "Captcha": {
+    "Enabled": true,
+    "ProjectId": "my-gcp-project",
+    "ApiKey": "<from-key-vault>",
+    "ScoreSiteKey": "<score-key>",
+    "SiteKey": "<checkbox-key>",
+    "MinScore": 0.5,
+    "FailureMessage": "Security verification failed. Reload the page and try again."
+  }
+}
+```
+
+**Client** — `NuvTools.Security.AspNetCore.Blazor`:
+
+```csharp
+// Program.cs — only the site keys are read here, never the API key
+services.AddCaptcha(builder.Configuration);
+```
+
+```razor
+@using NuvTools.Security.AspNetCore.Blazor.Captcha
+
+<Captcha @ref="_captcha" />
+
+@code {
+    private Captcha _captcha = default!;
+
+    private async Task SubmitAsync()
+    {
+        var (token, mode) = await _captcha.GetTokenAsync();
+
+        // The checkbox is on screen but unsolved — stop and let the user solve it.
+        if (mode == CaptchaDefaults.ModeCheckbox && string.IsNullOrEmpty(token))
+            return;
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "v1/security/account/forgotpassword");
+        request.AddCaptchaToken(token, mode);
+
+        var result = await Send(request);
+
+        // Low score: the server asked for the step-up, so render the checkbox and let the user retry.
+        if (await _captcha.HandleStepUpAsync(result))
+            return;
+
+        if (!result.Succeeded)
+            await _captcha.ResetAsync(); // the token is single-use
+    }
+}
+```
+
+Set `Captcha:Enabled` to `false` in development so no token is required. When the provider script cannot load, the client sends an empty token and the server rejects it — the user sees a message instead of a stuck button.
 
 ## Features
 

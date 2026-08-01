@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
 		<TargetFrameworks>net8;net9;net10.0</TargetFrameworks>
@@ -9,8 +9,8 @@
 		<Authors>Nuv Tools</Authors>
 		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
-		<Description>Authentication state providers for Blazor applications with JWT and OIDC support.</Description>
-		<Version>10.2.9</Version>
+		<Description>Authentication state providers for Blazor applications with JWT and OIDC support, plus an adaptive CAPTCHA component.</Description>
+		<Version>10.3.0</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -20,7 +20,7 @@
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>NuvTools Security Blazor Authentication OIDC</PackageTags>
+		<PackageTags>NuvTools Security Blazor Authentication OIDC Captcha reCAPTCHA</PackageTags>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -47,7 +47,12 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.10" Condition="'$(TargetFramework)' == 'net10.0'" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="9.0.18" Condition="'$(TargetFramework)' == 'net9'" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="8.0.29" Condition="'$(TargetFramework)' == 'net8'" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.10" Condition="'$(TargetFramework)' == 'net10.0'" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.18" Condition="'$(TargetFramework)' == 'net9'" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.29" Condition="'$(TargetFramework)' == 'net8'" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.10" />
 		<PackageReference Include="NuvTools.AspNetCore.Blazor" Version="10.1.9" />
+		<PackageReference Include="NuvTools.Common" Version="10.0.10" />
 	</ItemGroup>
 
 	<ItemGroup>

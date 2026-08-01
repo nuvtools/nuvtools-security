@@ -53,11 +53,14 @@ dotnet test --filter "FullyQualifiedName~TestMethodName"
 The project has the following dependency hierarchy:
 - **NuvTools.Security** (core, no project dependencies)
   - Depends on: System.IdentityModel.Tokens.Jwt, Microsoft.AspNetCore.Authorization
-- **NuvTools.Security.AspNetCore** (no project dependencies)
-  - Depends on: Microsoft.Extensions.Options.ConfigurationExtensions
+- **NuvTools.Security.AspNetCore** (depends on NuvTools.Security)
+  - Depends on: Microsoft.Extensions.Options.ConfigurationExtensions, NuvTools.Common
   - Framework reference: Microsoft.AspNetCore.App
 - **NuvTools.Security.AspNetCore.Blazor** (depends on NuvTools.Security)
-  - Depends on: NuvTools.AspNetCore.Blazor, Microsoft.AspNetCore.Components.Authorization, Microsoft.AspNetCore.Components.WebAssembly.Authentication
+  - Razor Class Library (`Microsoft.NET.Sdk.Razor`) — ships components and static web assets
+  - Depends on: NuvTools.AspNetCore.Blazor, NuvTools.Common, Microsoft.AspNetCore.Components.Authorization, Microsoft.AspNetCore.Components.WebAssembly.Authentication, Microsoft.AspNetCore.Components.Web
+
+**Never reference `NuvTools.Security.AspNetCore` from a WebAssembly project** — its `Microsoft.AspNetCore.App` framework reference is server-only. Whatever the client also needs (the CAPTCHA contract, for instance) belongs in `NuvTools.Security`, which carries no framework reference.
 
 ### NuvTools.Security Library
 
@@ -107,6 +110,18 @@ Core security library providing JWT, cryptography, and claims utilities.
 
 **ClaimConstants** - Standard claim type strings (Sub, Email, GivenName, FamilyName, Upn, PreferredUsername, UniqueName)
 
+#### CAPTCHA contract (`NuvTools.Security.Captcha`)
+
+Shared by the client that produces the token and the server that validates it. Lives here — not in `NuvTools.Security.AspNetCore` — so Blazor WebAssembly can consume it without pulling the ASP.NET Core shared framework.
+
+**CaptchaDefaults** - Header names (`X-Captcha-Token`, `X-Captcha-Mode`, `X-Captcha-Stepup`), the `captcha-stepup` marker, and the `score`/`checkbox` modes
+
+**CaptchaOptions** - Binds the `Captcha` section: `Enabled`, keys, `MinScore`, `AssessmentBaseUrl`, `FailureMessage`
+
+**ICaptchaVerifier / CaptchaVerification** - Provider-neutral verification contract
+
+**CaptchaHttpRequestExtensions** - `AddCaptchaToken()` attaches the headers to an `HttpRequestMessage`
+
 ### NuvTools.Security.AspNetCore Library
 
 ASP.NET Core integration for security configuration and user services.
@@ -126,9 +141,25 @@ ASP.NET Core integration for security configuration and user services.
 - Requires IHttpContextAccessor registration
 - Properties: NameIdentifier, RemoteIpAddress, RemotePort, FullRemoteAddress, Claims
 
+#### CAPTCHA (`NuvTools.Security.AspNetCore.Captcha`)
+
+Adaptive anti-bot gate for public endpoints (login, password reset, public queries).
+
+**ValidateCaptchaAttribute / ValidateCaptchaFilter**
+- Score mode passes when the token is valid and scores at or above `MinScore`; otherwise the response carries the step-up marker so the client presents the checkbox
+- Checkbox mode only requires a valid token — the user already solved the challenge
+- Fail-closed: an empty or invalid token never reaches the action
+
+**ReCaptchaEnterpriseVerifier**
+- Creates the assessment on the Google Cloud reCAPTCHA Enterprise API; the API key stays server-side
+- Network failures are logged and treated as invalid
+
+**CaptchaServiceCollectionExtensions**
+- `AddCaptcha(configuration, timeoutInSeconds = 10)` binds the options and registers the verifier with its own HttpClient
+
 ### NuvTools.Security.AspNetCore.Blazor Library
 
-Blazor authentication state providers.
+Blazor authentication state providers and the client half of the adaptive CAPTCHA.
 
 **ManualAuthenticationStateProvider**
 - JWT-based authentication with local storage (uses ILocalStorageService from NuvTools.AspNetCore.Blazor)
@@ -142,6 +173,18 @@ Blazor authentication state providers.
 - OIDC/OAuth authentication integration
 - Extends RemoteAuthenticationService
 
+#### CAPTCHA (`NuvTools.Security.AspNetCore.Blazor.Captcha`)
+
+**Captcha component**
+- Invisible by default (score key); renders the "I'm not a robot" checkbox only on step-up
+- `GetTokenAsync()` before submitting, `HandleStepUpAsync(result)` on the response, `ResetAsync()` for a retry (the token is single-use)
+- `Class` parameter styles the element hosting the widget — the package ships no CSS of its own
+
+**ICaptchaService / CaptchaService**
+- Backed by the `captcha.js` ES module served from `_content/NuvTools.Security.AspNetCore.Blazor/`
+- When the provider script cannot load (network, ad blocker, CSP) it returns an empty token instead of hanging; the server rejects an empty token, so the outcome is fail-closed
+- Register with `AddCaptcha(configuration)` — only the site keys are read on the client
+
 ## Testing
 
 The test project uses NUnit 4.x and targets net10.0. Test files follow the naming convention `{ComponentName}Tests.cs`:
@@ -149,6 +192,7 @@ The test project uses NUnit 4.x and targets net10.0. Test files follow the namin
 - HashHelperTests.cs
 - AesEncryptionHelperTests.cs
 - JwtHelperTests.cs
+- Captcha/ValidateCaptchaFilterTests.cs (with `StubCaptchaVerifier`)
 
 ## Code Style
 

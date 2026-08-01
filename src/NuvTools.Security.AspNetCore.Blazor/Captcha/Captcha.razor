@@ -1,0 +1,7 @@
+@namespace NuvTools.Security.AspNetCore.Blazor.Captcha
+
+@* Invisible by default (score). The checkbox is only rendered on step-up (low score). *@
+@if (Enabled && IsStepUp)
+{
+    <div id="@ElementId" class="@Class"></div>
+}

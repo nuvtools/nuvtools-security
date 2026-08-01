@@ -17,6 +17,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\src\NuvTools.Security\NuvTools.Security.csproj" />
+	  <ProjectReference Include="..\..\src\NuvTools.Security.AspNetCore\NuvTools.Security.AspNetCore.csproj" />
 	</ItemGroup>
 
 </Project>
