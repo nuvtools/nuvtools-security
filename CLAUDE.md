@@ -122,6 +122,22 @@ Shared by the client that produces the token and the server that validates it. L
 
 **CaptchaHttpRequestExtensions** - `AddCaptchaToken()` attaches the headers to an `HttpRequestMessage`
 
+#### Network (`NuvTools.Security.Network`)
+
+SSRF protection for outbound HTTP to URLs somebody else supplied.
+
+**NetworkAddressPolicy**
+- `IsAllowed(IPAddress)` - Denies loopback, private, link-local (metadata), CGNAT, documentation, multicast, reserved, IPv4-embedding IPv6 prefixes and Azure's `168.63.129.16`; IPv4-mapped addresses are judged as IPv4; `allowedNetworks` override, `additionalDeniedNetworks` extend
+- `IsHostAllowed(string)` - Refuses `localhost` and the `.localhost`/`.local`/`.internal` suffixes before any lookup (a second line only)
+- `ResolveAllowedAsync(host)` - Resolves and throws `NetworkAddressNotAllowedException` if the name or **any** address is denied
+- `PublicOnly` - The default instance
+
+**PublicNetworkConnector**
+- `CreateHandler(policy?)` / `Apply(handler, policy?)` / `CreateConnectCallback(policy)` - Checks inside `SocketsHttpHandler.ConnectCallback`, so the checked address is the connected address (no DNS-rebinding gap); every redirect hop passes through it; the proxy is switched off
+- Refusals surface as `HttpRequestException` with a `NetworkAddressNotAllowedException` inner exception
+
+Do not replace the socket-level check with a URL or pre-resolution check: the gap between the check and the connection is the vulnerability.
+
 ### NuvTools.Security.AspNetCore Library
 
 ASP.NET Core integration for security configuration and user services.
@@ -193,6 +209,7 @@ The test project uses NUnit 4.x and targets net10.0. Test files follow the namin
 - AesEncryptionHelperTests.cs
 - JwtHelperTests.cs
 - Captcha/ValidateCaptchaFilterTests.cs (with `StubCaptchaVerifier`)
+- Network/NetworkAddressPolicyTests.cs, Network/PublicNetworkConnectorTests.cs (real `HttpClient` against a loopback listener)
 
 ## Code Style
 

@@ -7,8 +7,8 @@
 		<Authors>Nuv Tools</Authors>
 		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
-		<Description>Core security library providing JWT token handling, cryptography utilities, ClaimsPrincipal extensions, and the shared CAPTCHA contract.</Description>
-		<Version>10.3.0</Version>
+		<Description>Core security library providing JWT token handling, cryptography utilities, ClaimsPrincipal extensions, the shared CAPTCHA contract, and SSRF protection for outbound HTTP.</Description>
+		<Version>10.3.1</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -18,14 +18,14 @@
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>NuvTools Security JWT Cryptography Claims Captcha reCAPTCHA</PackageTags>
+		<PackageTags>NuvTools Security JWT Cryptography Claims Captcha reCAPTCHA SSRF</PackageTags>
 		<ImplicitUsings>true</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.22.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="10.0.10" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="10.0.12" />
 	</ItemGroup>
 
 	<ItemGroup>

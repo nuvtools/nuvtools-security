@@ -18,6 +18,7 @@ Core security library providing JWT token handling, cryptography utilities, clai
 - **Claim Extensions**: Build claims collections with permission support
 - **Authorization Extensions**: Fluent API for building permission-based policies
 - **CAPTCHA Contract**: Options, header constants and the `ICaptchaVerifier` abstraction shared by client and server
+- **SSRF protection**: `NetworkAddressPolicy` and `PublicNetworkConnector` restrict outbound HTTP connections to publicly routable addresses, judged on the address the socket actually connects to
 
 > Carries no ASP.NET Core framework reference, so it is safe to consume from Blazor WebAssembly.
 
@@ -398,6 +399,41 @@ services.AddCaptcha(builder.Configuration);
 ```
 
 Set `Captcha:Enabled` to `false` in development so no token is required. When the provider script cannot load, the client sends an empty token and the server rejects it — the user sees a message instead of a stuck button.
+
+### Fetching URLs Somebody Else Supplied (SSRF)
+
+When an application fetches a URL a user typed — a webhook, a health probe, a document to import — it can be pointed at its own network: `http://169.254.169.254/` (cloud metadata), `http://10.0.0.5/admin`, or a public domain whose DNS answers a private address. Checking the URL first does not help, because DNS can answer differently to the check and to the connection.
+
+`PublicNetworkConnector` checks the address inside `SocketsHttpHandler.ConnectCallback` — the address that is checked is the address the socket connects to. Every hop goes through it, so a redirect to a private address is refused too, and the proxy is switched off so the callback never only sees a proxy.
+
+```csharp
+using NuvTools.Security.Network;
+
+// Publicly routable addresses only
+using var client = new HttpClient(PublicNetworkConnector.CreateHandler());
+
+try
+{
+    var body = await client.GetStringAsync(userSuppliedUrl);
+}
+catch (HttpRequestException ex) when (ex.InnerException is NetworkAddressNotAllowedException refused)
+{
+    // refused.Host is safe to log; refused.Address is the address that was denied
+}
+
+// With IHttpClientFactory
+services.AddHttpClient("untrusted")
+    .ConfigurePrimaryHttpMessageHandler(() => PublicNetworkConnector.CreateHandler());
+
+// A handler created elsewhere (a reverse proxy's forwarder, for example)
+PublicNetworkConnector.Apply(socketsHttpHandler, new NetworkAddressPolicy(
+    allowedNetworks: [IPNetwork.Parse("10.20.0.0/16")],          // an internal range you trust
+    additionalDeniedHostSuffixes: ["azurecontainerapps.io"]));   // names refused before any lookup
+```
+
+Denied by default: loopback, private (RFC 1918, IPv6 unique-local), link-local including `169.254.169.254`, carrier-grade NAT, documentation and benchmarking ranges, multicast, reserved space, IPv6 prefixes that embed an IPv4 address (NAT64, 6to4, Teredo), Azure's platform address `168.63.129.16`, and the host names `localhost`, `*.localhost`, `*.local` and `*.internal`. An IPv4-mapped IPv6 address is judged as the IPv4 address it carries. A name resolving to *any* denied address is refused as a whole.
+
+`NetworkAddressPolicy.ResolveAllowedAsync(host)` applies the same rule without making a request — useful for validating a host a user registers.
 
 ## Features
 
