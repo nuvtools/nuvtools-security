@@ -5,6 +5,8 @@
   <Folder Name="/src/">
     <Project Path="src\NuvTools.Security.AspNetCore.Blazor\NuvTools.Security.AspNetCore.Blazor.csproj" />
     <Project Path="src\NuvTools.Security.AspNetCore\NuvTools.Security.AspNetCore.csproj" />
+    <Project Path="src\NuvTools.Security.Biometrics.Serpro\NuvTools.Security.Biometrics.Serpro.csproj" />
+    <Project Path="src\NuvTools.Security.Certificate.Lacuna\NuvTools.Security.Certificate.Lacuna.csproj" />
     <Project Path="src\NuvTools.Security\NuvTools.Security.csproj" />
   </Folder>
   <Folder Name="/tests/">

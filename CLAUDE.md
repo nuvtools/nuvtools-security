@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-NuvTools.Security is a collection of .NET libraries for implementing security features in ASP.NET Core and Blazor applications. The repository contains three NuGet packages that provide JWT handling, cryptography, claims management, authorization policies, and Blazor authentication state providers.
+NuvTools.Security is a collection of .NET libraries for implementing security features in ASP.NET Core and Blazor applications. The repository contains five NuGet packages that provide JWT handling, cryptography, claims management, authorization policies, Blazor authentication state providers, digital certificate authentication and facial verification.
 
 ## Solution Structure
 
@@ -13,6 +13,8 @@ The solution follows a standard .NET library pattern with multi-targeting suppor
 - **src/NuvTools.Security** - Core security library with JWT helpers, cryptography, claims extensions, and authorization policy builders
 - **src/NuvTools.Security.AspNetCore** - ASP.NET Core integration with configuration models and CurrentUserService
 - **src/NuvTools.Security.AspNetCore.Blazor** - Blazor authentication state providers (manual and OIDC)
+- **src/NuvTools.Security.Certificate.Lacuna** - Lacuna REST PKI implementation of the certificate authentication contract
+- **src/NuvTools.Security.Biometrics.Serpro** - SERPRO Datavalid implementation of the facial verification contract
 - **tests/NuvTools.Security.Test** - NUnit test project
 
 All libraries target net8, net9, and net10.0 frameworks.
@@ -59,6 +61,12 @@ The project has the following dependency hierarchy:
 - **NuvTools.Security.AspNetCore.Blazor** (depends on NuvTools.Security)
   - Razor Class Library (`Microsoft.NET.Sdk.Razor`) — ships components and static web assets
   - Depends on: NuvTools.AspNetCore.Blazor, NuvTools.Common, Microsoft.AspNetCore.Components.Authorization, Microsoft.AspNetCore.Components.WebAssembly.Authentication, Microsoft.AspNetCore.Components.Web
+- **NuvTools.Security.Certificate.Lacuna** (depends on NuvTools.Security)
+  - Depends on: Lacuna.RestPki.Client, NuvTools.Common, Microsoft.Extensions.Logging.Abstractions, Microsoft.Extensions.Options.ConfigurationExtensions
+- **NuvTools.Security.Biometrics.Serpro** (depends on NuvTools.Security)
+  - Depends on: NuvTools.Common, NuvTools.Validation, Microsoft.Extensions.Http, Microsoft.Extensions.Options.ConfigurationExtensions
+
+**Contract and provider never share a package.** The provider-neutral contracts (`ICertificateAuthenticator`, `IFaceVerifier` and their result types) live in `NuvTools.Security`, with no dependency of their own. Each provider is a package named `NuvTools.Security.<Area>.<Provider>`, and it is the only place its SDK or wire format may be referenced. A new provider is a new package; nothing provider-specific goes into `NuvTools.Security`, and neither provider package takes the ASP.NET Core framework reference.
 
 **Never reference `NuvTools.Security.AspNetCore` from a WebAssembly project** — its `Microsoft.AspNetCore.App` framework reference is server-only. Whatever the client also needs (the CAPTCHA contract, for instance) belongs in `NuvTools.Security`, which carries no framework reference.
 
@@ -121,6 +129,28 @@ Shared by the client that produces the token and the server that validates it. L
 **ICaptchaVerifier / CaptchaVerification** - Provider-neutral verification contract
 
 **CaptchaHttpRequestExtensions** - `AddCaptchaToken()` attaches the headers to an `HttpRequestMessage`
+
+#### Certificate authentication contract (`NuvTools.Security.Certificate`)
+
+Sign-in with a digital certificate: the server opens a challenge, the client signs it, the server validates the answer.
+
+**ICertificateAuthenticator**
+- `StartAsync()` - Opens the authentication and returns the `CertificateChallenge` the client signs; provider failures propagate
+- `CompleteAsync(token)` - Returns a `CertificateAuthentication` (`Valid`, `Subject`, `Failure`); never throws for a refused or unreachable provider (fail-closed)
+
+**CertificateSubject** - Name, Email, Cpf, Cnpj, CompanyName read from the validated certificate. The contract does not decide which are required — that is the application's rule.
+
+**CertificateFailureType** - `Rejected` (the provider answered and refused) or `Unavailable` (nothing is known)
+
+#### Facial verification contract (`NuvTools.Security.Biometrics`)
+
+Verification against the face a provider holds on record for a person.
+
+**IFaceVerifier** - `VerifyAsync(FaceVerificationRequest)` returns a `FaceVerification` (`Matched`, `Similarity`, `Liveness`, `Failure`); fail-closed
+
+**FaceVerificationFailureType** - Distinguishes what a new capture can fix (`FaceNotDetected`, `LowImageQuality`, `MultipleFaces`) from what it cannot (`FaceNotOnRecord`), plus `NotMatched`, `LivenessRejected`, `InvalidDocument`, `InvalidImage`, `Rejected`, `Unavailable`
+
+Both contracts must be called inside the sign-in operation itself. Do not add an endpoint that only verifies and a sign-in that trusts a flag from the caller.
 
 #### Network (`NuvTools.Security.Network`)
 
@@ -201,6 +231,39 @@ Blazor authentication state providers and the client half of the adaptive CAPTCH
 - When the provider script cannot load (network, ad blocker, CSP) it returns an empty token instead of hanging; the server rejects an empty token, so the outcome is fail-closed
 - Register with `AddCaptcha(configuration)` — only the site keys are read on the client
 
+### NuvTools.Security.Certificate.Lacuna Library
+
+Lacuna REST PKI behind `ICertificateAuthenticator`. The only place Lacuna's SDK is referenced.
+
+**RestPkiCertificateAuthenticator / RestPkiOptions** (`NuvTools.Security.Certificate.Lacuna`)
+- Web PKI in the browser (`signWithRestPki`); builds its own `RestPkiClient`, so it does not collide with one the application registers for signing documents
+- `SecurityContext`: `PkiBrazil` (default), `LacunaTest`, or a security context id. An unknown value throws — it never falls back, so a typo cannot change which roots are trusted
+
+**LacunaCertificateServiceCollectionExtensions** - `AddLacunaCertificateAuthentication(configuration, sectionName = "RestPki")` binds the section
+
+### NuvTools.Security.Biometrics.Serpro Library
+
+SERPRO Datavalid behind `IFaceVerifier`. The only place Datavalid's wire format is known (`Messages/`, internal).
+
+**DatavalidFaceVerifier / DatavalidOptions** (`NuvTools.Security.Biometrics.Serpro`)
+- Datavalid `pf-facial`; an invalid CPF or empty image is refused before the (billed) call
+- `MinSimilarity` (default 0.9) and `AcceptedLiveness` (default empty = not enforced, only reported) are the application's decision
+- Never logs the CPF or the image
+
+**DatavalidAccessTokenProvider** - Singleton that caches the gateway token (client credentials) and replaces it five minutes before it expires; `Invalidate()` on a 401
+
+**SerproBiometricsServiceCollectionExtensions** - `AddSerproFaceVerification(configuration, sectionName = "Datavalid", timeoutInSeconds = 30)` binds the section
+
+## CI and Releasing
+
+`.github/workflows/ci.yml` builds the solution in Release with `-warnaserror` and runs the tests on every push and pull request to `main`.
+
+Each package has its own manually-run publish workflow (`security-publish.yml`, `aspnetcore-publish.yml`, `blazor-publish.yml`, `certificate-lacuna-publish.yml`, `biometrics-serpro-publish.yml`), all calling the reusable `package-publish.yml`. It reads `<Version>` from the `.csproj` (never computes it), verifies the package, pushes through nuget.org trusted publishing behind the `nuget` environment, and then writes the release tag (`security-vX.Y.Z`, …). See *Releasing* in the README.
+
+- A new package needs its own small workflow file and a row in the README table.
+- The SourceLink and symbol settings (`PublishRepositoryUrl`, `EmbedUntrackedSources`, `IncludeSymbols`, `snupkg`) must be in every packable project: the workflow fails a package without its `.snupkg`.
+- `NuvTools.Security` is published first. When it gains a type another package uses, its `<Version>` must be bumped and published before that package — the workflow only checks the dependency's version exists.
+
 ## Testing
 
 The test project uses NUnit 4.x and targets net10.0. Test files follow the naming convention `{ComponentName}Tests.cs`:
@@ -210,6 +273,8 @@ The test project uses NUnit 4.x and targets net10.0. Test files follow the namin
 - JwtHelperTests.cs
 - Captcha/ValidateCaptchaFilterTests.cs (with `StubCaptchaVerifier`)
 - Network/NetworkAddressPolicyTests.cs, Network/PublicNetworkConnectorTests.cs (real `HttpClient` against a loopback listener)
+- Certificate/RestPkiOptionsTests.cs, Certificate/RestPkiCertificateAuthenticatorTests.cs (no REST PKI account: options, missing token and an unreachable endpoint)
+- Biometrics/DatavalidFaceVerifierTests.cs (through the DI registration, with `StubHttpMessageHandler` and `ManualTimeProvider`)
 
 ## Code Style
 

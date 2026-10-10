@@ -20,6 +20,21 @@
 		<PackageTags>NuvTools Security AspNetCore Authentication Captcha reCAPTCHA</PackageTags>
 		<ImplicitUsings>true</ImplicitUsings>
 		<Nullable>enable</Nullable>
+
+		<!-- SourceLink: a stack trace from a consumer's process steps into the exact commit this
+		     package was built from. EmbedUntrackedSources covers the generated files, which are the
+		     ones a debugger otherwise cannot find. The .NET 8+ SDK has SourceLink built in, so no
+		     package reference is needed. -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<!-- Set by the publish workflow. Makes the build deterministic and marks the package as built by
+	     CI rather than on somebody's machine. -->
+	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 	</PropertyGroup>
 
 	<ItemGroup>

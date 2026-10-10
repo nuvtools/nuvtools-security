@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<LangVersion>latest</LangVersion>
+		<TargetFrameworks>net8;net9;net10.0</TargetFrameworks>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>Nuv Tools</Authors>
+		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
+		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
+		<Description>Lacuna REST PKI implementation of the NuvTools.Security certificate authentication contract: possession of the private key and the ICP-Brasil chain are validated on the service.</Description>
+		<Version>10.0.0</Version>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<RepositoryUrl>https://github.com/nuvtools/nuvtools-security</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageTags>NuvTools Security Authentication Certificate ICP-Brasil Lacuna RestPki</PackageTags>
+		<ImplicitUsings>true</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+		<!-- SourceLink: a stack trace from a consumer's process steps into the exact commit this
+		     package was built from. EmbedUntrackedSources covers the generated files, which are the
+		     ones a debugger otherwise cannot find. The .NET 8+ SDK has SourceLink built in, so no
+		     package reference is needed. -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<!-- Set by the publish workflow. Makes the build deterministic and marks the package as built by
+	     CI rather than on somebody's machine. -->
+	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Lacuna.RestPki.Client" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
+		<PackageReference Include="NuvTools.Common" Version="10.0.10" />
+
+		<ProjectReference Include="..\NuvTools.Security\NuvTools.Security.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\..\icon.png">
+			<Link>icon.png</Link>
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\..\LICENSE">
+			<Link>LICENSE</Link>
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+</Project>
