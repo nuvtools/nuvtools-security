@@ -88,18 +88,18 @@ public class NetworkAddressPolicyTests
     }
 
     [Test]
-    public void ResolveAllowedAsync_ShouldRefuseADeniedLiteral_WithoutAskingDns()
+    public async Task ResolveAllowedAsync_ShouldRefuseADeniedLiteral_WithoutAskingDns()
     {
-        var exception = Assert.ThrowsAsync<NetworkAddressNotAllowedException>(
+        var exception = await Assert.ThrowsAsync<NetworkAddressNotAllowedException>(
             () => NetworkAddressPolicy.PublicOnly.ResolveAllowedAsync("[::1]"));
 
         Assert.That(exception!.Address, Is.EqualTo(IPAddress.IPv6Loopback));
     }
 
     [Test]
-    public void ResolveAllowedAsync_ShouldRefuseLocalhostByName()
+    public async Task ResolveAllowedAsync_ShouldRefuseLocalhostByName()
     {
-        var exception = Assert.ThrowsAsync<NetworkAddressNotAllowedException>(
+        var exception = await Assert.ThrowsAsync<NetworkAddressNotAllowedException>(
             () => NetworkAddressPolicy.PublicOnly.ResolveAllowedAsync("localhost"));
 
         Assert.That(exception!.Address, Is.Null);

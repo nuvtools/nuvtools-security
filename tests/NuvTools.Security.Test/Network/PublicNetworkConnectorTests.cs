@@ -17,21 +17,21 @@ public class PublicNetworkConnectorTests
         new(allowedNetworks: [IPNetwork.Parse("127.0.0.1/32")]);
 
     [Test]
-    public void PublicOnly_ShouldRefuseALoopbackLiteral_BeforeConnecting()
+    public async Task PublicOnly_ShouldRefuseALoopbackLiteral_BeforeConnecting()
     {
         using var client = new HttpClient(PublicNetworkConnector.CreateHandler());
 
-        var exception = Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync("http://127.0.0.1:9/"));
+        var exception = await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync("http://127.0.0.1:9/"));
 
         Assert.That(exception!.InnerException, Is.InstanceOf<NetworkAddressNotAllowedException>());
     }
 
     [Test]
-    public void PublicOnly_ShouldRefuseTheInstanceMetadataEndpoint()
+    public async Task PublicOnly_ShouldRefuseTheInstanceMetadataEndpoint()
     {
         using var client = new HttpClient(PublicNetworkConnector.CreateHandler());
 
-        var exception = Assert.ThrowsAsync<HttpRequestException>(
+        var exception = await Assert.ThrowsAsync<HttpRequestException>(
             () => client.GetAsync("http://169.254.169.254/metadata/instance"));
 
         Assert.That(exception!.InnerException, Is.InstanceOf<NetworkAddressNotAllowedException>());
@@ -49,7 +49,7 @@ public class PublicNetworkConnectorTests
     }
 
     [Test]
-    public void ARedirectToADeniedAddress_ShouldBeRefusedAtTheSecondHop()
+    public async Task ARedirectToADeniedAddress_ShouldBeRefusedAtTheSecondHop()
     {
         // The first hop is allowed; the Location it answers with is not. Following redirects is the
         // handler's default, and every hop opens a connection through the callback.
@@ -57,7 +57,7 @@ public class PublicNetworkConnectorTests
             "HTTP/1.1 302 Found\r\nLocation: http://169.254.169.254/latest/meta-data/\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
         using var client = new HttpClient(PublicNetworkConnector.CreateHandler(LoopbackAllowed));
 
-        var exception = Assert.ThrowsAsync<HttpRequestException>(
+        var exception = await Assert.ThrowsAsync<HttpRequestException>(
             () => client.GetAsync($"http://127.0.0.1:{server.Port}/"));
 
         Assert.That(exception!.InnerException, Is.InstanceOf<NetworkAddressNotAllowedException>());
