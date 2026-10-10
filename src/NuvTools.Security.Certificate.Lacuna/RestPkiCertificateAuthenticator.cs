@@ -1,7 +1,6 @@
 using Lacuna.RestPki.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NuvTools.Common.Strings;
 
 namespace NuvTools.Security.Certificate.Lacuna;
 
@@ -49,7 +48,7 @@ public sealed class RestPkiCertificateAuthenticator(
                 return CertificateAuthentication.Failed(CertificateFailureType.Rejected);
             }
 
-            return CertificateAuthentication.Succeeded(ReadSubject(authentication.GetCertificate()));
+            return CertificateAuthentication.Succeeded(RestPkiCertificateReader.ToSubject(authentication.GetCertificate()));
         }
         catch (Exception ex)
         {
@@ -58,18 +57,4 @@ public sealed class RestPkiCertificateAuthenticator(
             return CertificateAuthentication.Failed(CertificateFailureType.Unavailable);
         }
     }
-
-    private static CertificateSubject ReadSubject(PKCertificate certificate)
-        => new(
-            certificate.SubjectName?.CommonName,
-            NullIfBlank(certificate.EmailAddress),
-            DigitsOrNull(certificate.PkiBrazil?.Cpf),
-            DigitsOrNull(certificate.PkiBrazil?.Cnpj),
-            NullIfBlank(certificate.PkiBrazil?.CompanyName));
-
-    private static string? NullIfBlank(string? value)
-        => string.IsNullOrWhiteSpace(value) ? null : value;
-
-    private static string? DigitsOrNull(string? value)
-        => NullIfBlank(value?.GetNumbersOnly());
 }

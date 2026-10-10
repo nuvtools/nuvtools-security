@@ -142,6 +142,19 @@ Sign-in with a digital certificate: the server opens a challenge, the client sig
 
 **CertificateFailureType** - `Rejected` (the provider answered and refused) or `Unavailable` (nothing is known)
 
+#### Document signing contract (`NuvTools.Security.Certificate.Signing`)
+
+Signing a PDF with a certificate whose key stays with the person: prepare, client signs, complete.
+
+**IDocumentSigner**
+- `ReadCertificateAsync(certificate)` / `GetSignersAsync(signedDocument)` - Return `CertificateDetails` (subject, responsible, issuer, validity, SHA-256 thumbprint); they read, they do not validate
+- `StartAsync(DocumentSignatureRequest)` - Returns the `DocumentSignatureChallenge` the client signs
+- `CompleteAsync(token)` - Returns the `SignedDocument` (content and the certificate actually used)
+
+**SignatureStamp / SignatureStampPlacement / SignatureStampArea** - The optional visible mark: an image supplied by the application, stacked inside an area of a page (centimeters; negative page number counts from the end)
+
+Provider failures propagate as exceptions here — signing is not an access decision, so unlike the two sign-in contracts there is nothing to fail closed to.
+
 #### Facial verification contract (`NuvTools.Security.Biometrics`)
 
 Verification against the face a provider holds on record for a person.
@@ -239,7 +252,11 @@ Lacuna REST PKI behind `ICertificateAuthenticator`. The only place Lacuna's SDK 
 - Web PKI in the browser (`signWithRestPki`); builds its own `RestPkiClient`, so it does not collide with one the application registers for signing documents
 - `SecurityContext`: `PkiBrazil` (default), `LacunaTest`, or a security context id. An unknown value throws — it never falls back, so a typo cannot change which roots are trusted
 
-**LacunaCertificateServiceCollectionExtensions** - `AddLacunaCertificateAuthentication(configuration, sectionName = "RestPki")` binds the section
+**RestPkiDocumentSigner** - PAdES through REST PKI: `PadesSignatureStarter` / `PadesSignatureFinisher2`, with the policy from `RestPkiOptions.PadesSignaturePolicy` (`Basic` by default, or a policy id; an unknown value throws). REST PKI refuses an appearance made of an image alone, so a one-space text accompanies the stamp.
+
+**RestPkiCertificateReader** (internal) - The one place REST PKI's two certificate shapes (`PKCertificate` and `CertificateModel`) become the contract's; documents come out digits-only and blank values as `null`
+
+**LacunaCertificateServiceCollectionExtensions** - `AddLacunaCertificateAuthentication(configuration, sectionName = "RestPki")` and `AddLacunaDocumentSigning(configuration, sectionName = "RestPki")`, independent of each other and reading the same section
 
 ### NuvTools.Security.Biometrics.Serpro Library
 
@@ -273,7 +290,8 @@ The test project uses NUnit 4.x and targets net10.0. Test files follow the namin
 - JwtHelperTests.cs
 - Captcha/ValidateCaptchaFilterTests.cs (with `StubCaptchaVerifier`)
 - Network/NetworkAddressPolicyTests.cs, Network/PublicNetworkConnectorTests.cs (real `HttpClient` against a loopback listener)
-- Certificate/RestPkiOptionsTests.cs, Certificate/RestPkiCertificateAuthenticatorTests.cs (no REST PKI account: options, missing token and an unreachable endpoint)
+- Certificate/RestPkiOptionsTests.cs, Certificate/RestPkiCertificateAuthenticatorTests.cs, Certificate/RestPkiDocumentSignerTests.cs (no REST PKI account: options, missing token and an unreachable endpoint)
+- Certificate/RestPkiCertificateReaderTests.cs (the mapping, through `InternalsVisibleTo`)
 - Biometrics/DatavalidFaceVerifierTests.cs (through the DI registration, with `StubHttpMessageHandler` and `ManualTimeProvider`)
 
 ## Code Style

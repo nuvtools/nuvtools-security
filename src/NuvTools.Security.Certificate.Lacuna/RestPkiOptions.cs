@@ -40,6 +40,36 @@ public sealed class RestPkiOptions
     /// </remarks>
     public string SecurityContext { get; set; } = PkiBrazilSecurityContext;
 
+    /// <summary>Name of the basic PAdES signature policy.</summary>
+    public const string BasicPadesSignaturePolicy = "Basic";
+
+    /// <summary>
+    /// Which policy a PDF is signed under: <see cref="BasicPadesSignaturePolicy"/> (the default) or the
+    /// id of another PAdES signature policy REST PKI knows. Only document signing reads it.
+    /// </summary>
+    public string PadesSignaturePolicy { get; set; } = BasicPadesSignaturePolicy;
+
+    /// <summary>
+    /// Resolves <see cref="PadesSignaturePolicy"/> to the id REST PKI expects.
+    /// </summary>
+    /// <returns>The signature policy id.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// <see cref="PadesSignaturePolicy"/> is neither a known name nor an id.
+    /// </exception>
+    public Guid GetPadesSignaturePolicyId()
+    {
+        var value = PadesSignaturePolicy?.Trim();
+
+        if (string.IsNullOrEmpty(value) || value.Equals(BasicPadesSignaturePolicy, StringComparison.OrdinalIgnoreCase))
+            return StandardPadesSignaturePolicies.Basic;
+
+        if (Guid.TryParse(value, out var id))
+            return id;
+
+        throw new InvalidOperationException(
+            $"'{value}' is not a REST PKI PAdES signature policy. Use '{BasicPadesSignaturePolicy}' or a signature policy id.");
+    }
+
     /// <summary>
     /// Resolves <see cref="SecurityContext"/> to the id REST PKI expects.
     /// </summary>

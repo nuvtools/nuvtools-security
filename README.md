@@ -18,7 +18,7 @@ Core security library providing JWT token handling, cryptography utilities, clai
 - **Claim Extensions**: Build claims collections with permission support
 - **Authorization Extensions**: Fluent API for building permission-based policies
 - **CAPTCHA Contract**: Options, header constants and the `ICaptchaVerifier` abstraction shared by client and server
-- **Certificate and Biometrics Contracts**: `ICertificateAuthenticator` and `IFaceVerifier`, provider-neutral, with their result and failure types
+- **Certificate and Biometrics Contracts**: `ICertificateAuthenticator`, `IDocumentSigner` and `IFaceVerifier`, provider-neutral, with their result and failure types
 - **SSRF protection**: `NetworkAddressPolicy` and `PublicNetworkConnector` restrict outbound HTTP connections to publicly routable addresses, judged on the address the socket actually connects to
 
 > Carries no ASP.NET Core framework reference, so it is safe to consume from Blazor WebAssembly.
@@ -46,11 +46,12 @@ Authentication state providers for Blazor applications with JWT and OIDC support
 
 ### NuvTools.Security.Certificate.Lacuna
 
-Lacuna REST PKI behind the `ICertificateAuthenticator` contract that `NuvTools.Security` defines.
+Lacuna REST PKI behind the `ICertificateAuthenticator` and `IDocumentSigner` contracts that `NuvTools.Security` defines.
 
 **Key Features:**
 - **Validated on the service**: possession of the private key and the ICP-Brasil chain are checked by REST PKI — no key or licence is kept locally
 - **Fail-closed**: a missing token, a refused certificate or an unreachable provider never yields an identity
+- **PDF signing (PAdES)**: prepares the document, places the visible stamp and completes the signature, with the key kept by the person
 
 ### NuvTools.Security.Biometrics.Serpro
 
@@ -494,6 +495,43 @@ var user = await users.FindByCpfAsync(result.Subject!.Cpf);
 `SecurityContext` chooses the roots a certificate must chain to: `PkiBrazil` (the default), `LacunaTest`, or the id of a security context from the REST PKI console. `LacunaTest` accepts certificates anyone can issue, so keep it to development; an unknown value stops the application instead of falling back.
 
 `CertificateSubject` carries the name, e-mail, CPF, CNPJ and company name found in the certificate. Which of them a sign-in requires is the application's decision.
+
+### Signing a PDF with a Digital Certificate
+
+The same two steps as the sign-in, applied to a document: the server prepares the PDF and opens a challenge, the browser signs it with the certificate the person picks, and the server completes the signature. The private key never leaves the person's device.
+
+```csharp
+using NuvTools.Security.Certificate.Signing;            // the contract, from NuvTools.Security
+using NuvTools.Security.Certificate.Lacuna.Extensions;  // the provider — named here and nowhere else
+
+builder.Services.AddLacunaDocumentSigning(builder.Configuration);
+
+// Who is about to sign, read from the certificate itself
+var certificate = await signer.ReadCertificateAsync(certificateDer, cancellationToken);
+
+// Who signed already, to refuse the same person twice
+var previous = await signer.GetSignersAsync(pdf, cancellationToken);
+
+// 1. Prepare the document; the client signs challenge.Token with Web PKI (signWithRestPki)
+var stamp = new SignatureStamp(stampImage, "image/png",
+    new SignatureStampPlacement(PageNumber: -1, new SignatureStampArea(1.4, 4.9, 1.4, 2.2), Width: 8, Height: 2.2, RowSpacing: 0.3));
+
+var challenge = await signer.StartAsync(new DocumentSignatureRequest(pdf, stamp), cancellationToken);
+
+// 2. Complete it, and check the certificate that was actually used
+var signed = await signer.CompleteAsync(signedToken, cancellationToken);
+
+if (signed.Signer.Subject.Cpf != certificate.Subject.Cpf)
+    return Forbid();   // the client chooses the certificate at signing time
+```
+
+The stamp is optional and its image is the application's: the provider only places it. Stamps are stacked inside an area of a page, so a co-signature lands after the ones already there. Measures are in centimeters; a negative page number counts from the end.
+
+`ReadCertificateAsync` and `GetSignersAsync` read without validating — they answer what a certificate says, not whether it is trusted. The chain is validated when the signature is completed, against the `SecurityContext` configured for REST PKI.
+
+Unlike the sign-in, a provider failure here propagates as an exception: signing is not an access decision, so there is no safe result to fall back to.
+
+The PDF is signed under the basic PAdES policy unless `RestPki:PadesSignaturePolicy` holds the id of another one.
 
 ### Facial Verification
 

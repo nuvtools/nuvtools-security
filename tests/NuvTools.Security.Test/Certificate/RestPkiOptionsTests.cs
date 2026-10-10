@@ -42,6 +42,33 @@ public class RestPkiOptionsTests
         Assert.That(options.GetSecurityContextId(), Is.EqualTo(id));
     }
 
+    [TestCase("")]
+    [TestCase("Basic")]
+    [TestCase(" basic ")]
+    public void BasicOrBlankPolicy_SignsUnderTheBasicPadesPolicy(string policy)
+    {
+        var options = new RestPkiOptions { PadesSignaturePolicy = policy };
+
+        Assert.That(options.GetPadesSignaturePolicyId(), Is.EqualTo(StandardPadesSignaturePolicies.Basic));
+    }
+
+    [Test]
+    public void PolicyId_IsUsedAsIs()
+    {
+        var id = Guid.NewGuid();
+        var options = new RestPkiOptions { PadesSignaturePolicy = id.ToString() };
+
+        Assert.That(options.GetPadesSignaturePolicyId(), Is.EqualTo(id));
+    }
+
+    [Test]
+    public void UnknownPolicy_IsRefused()
+    {
+        var options = new RestPkiOptions { PadesSignaturePolicy = "Advanced" };
+
+        Assert.That(options.GetPadesSignaturePolicyId, Throws.InvalidOperationException);
+    }
+
     [Test]
     public void UnknownName_IsRefusedInsteadOfFallingBack()
     {

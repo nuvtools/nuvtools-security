@@ -1,11 +1,12 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NuvTools.Security.Certificate.Lacuna;
+using NuvTools.Security.Certificate.Signing;
 
 namespace NuvTools.Security.Certificate.Lacuna.Extensions;
 
 /// <summary>
-/// Extension methods for registering the certificate authentication services.
+/// Extension methods for registering the certificate authentication and document signing services.
 /// </summary>
 public static class LacunaCertificateServiceCollectionExtensions
 {
@@ -35,6 +36,36 @@ public static class LacunaCertificateServiceCollectionExtensions
         services.Configure<RestPkiOptions>(configuration.GetSection(sectionName));
 
         services.AddSingleton<ICertificateAuthenticator, RestPkiCertificateAuthenticator>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Binds <see cref="RestPkiOptions"/> from configuration and registers Lacuna REST PKI as the
+    /// <see cref="IDocumentSigner"/>.
+    /// </summary>
+    /// <param name="services">The service collection to add the services to.</param>
+    /// <param name="configuration">Configuration holding the REST PKI section.</param>
+    /// <param name="sectionName">
+    /// Name of the section to bind. Defaults to <see cref="RestPkiOptions.SectionName"/>; pass the
+    /// application's own when its settings already live under another name.
+    /// </param>
+    /// <returns>The service collection for chaining.</returns>
+    /// <remarks>
+    /// Independent of <see cref="AddLacunaCertificateAuthentication"/>: an application that only signs
+    /// documents registers only this, and one that does both calls both — they read the same section.
+    /// </remarks>
+    public static IServiceCollection AddLacunaDocumentSigning(this IServiceCollection services,
+        IConfiguration configuration,
+        string sectionName = RestPkiOptions.SectionName)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentException.ThrowIfNullOrWhiteSpace(sectionName);
+
+        services.Configure<RestPkiOptions>(configuration.GetSection(sectionName));
+
+        services.AddSingleton<IDocumentSigner, RestPkiDocumentSigner>();
 
         return services;
     }
