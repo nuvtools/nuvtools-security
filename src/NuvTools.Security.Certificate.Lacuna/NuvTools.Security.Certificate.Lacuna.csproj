@@ -42,7 +42,7 @@
 		<PackageReference Include="Lacuna.RestPki.Client" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
-		<PackageReference Include="NuvTools.Common" Version="10.0.10" />
+		<PackageReference Include="NuvTools.Common" Version="10.0.11" />
 
 		<ProjectReference Include="..\NuvTools.Security\NuvTools.Security.csproj" />
 	</ItemGroup>
