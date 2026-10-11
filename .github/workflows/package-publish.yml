@@ -178,7 +178,7 @@ jobs:
               if [ "${{ inputs.push }}" = "true" ]; then echo "::error::$message"; else echo "::warning::$message"; fi
             fi
           done < <(unzip -p "$nupkg" "$PACKAGE_ID.nuspec" \
-            | grep -oP '<dependency id="(NuvTools\.Security|NuvTools\.Security\.(AspNetCore|Certificate|Biometrics)[^"]*)" version="[0-9][^"]*"' \
+            | grep -oP '<dependency id="(NuvTools\.Security|NuvTools\.Security\.(AspNetCore|Certificate|Biometrics|Signing)[^"]*)" version="[0-9][^"]*"' \
             | sed -E 's/<dependency id="([^"]+)" version="([^"]+)"/\1 \2/' | sort -u)
           if [ "$missing" = "1" ] && [ "${{ inputs.push }}" = "true" ]; then exit 1; fi
 

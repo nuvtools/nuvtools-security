@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-NuvTools.Security is a collection of .NET libraries for implementing security features in ASP.NET Core and Blazor applications. The repository contains five NuGet packages that provide JWT handling, cryptography, claims management, authorization policies, Blazor authentication state providers, digital certificate authentication and facial verification.
+NuvTools.Security is a collection of .NET libraries for implementing security features in ASP.NET Core and Blazor applications. The repository contains six NuGet packages that provide JWT handling, cryptography, claims management, authorization policies, Blazor authentication state providers, digital certificate authentication, facial verification and token signing keys kept in Azure Key Vault.
 
 ## Solution Structure
 
@@ -15,6 +15,7 @@ The solution follows a standard .NET library pattern with multi-targeting suppor
 - **src/NuvTools.Security.AspNetCore.Blazor** - Blazor authentication state providers (manual and OIDC)
 - **src/NuvTools.Security.Certificate.Lacuna** - Lacuna REST PKI implementation of the certificate authentication contract
 - **src/NuvTools.Security.Biometrics.Serpro** - SERPRO Datavalid implementation of the facial verification contract
+- **src/NuvTools.Security.Signing.Azure** - Azure Key Vault implementation of the signing key contract
 - **tests/NuvTools.Security.Test** - NUnit test project
 
 All libraries target net8, net9, and net10.0 frameworks.
@@ -64,6 +65,7 @@ The project has the following dependency hierarchy:
 - **NuvTools.Security.Certificate.Lacuna** (depends on NuvTools.Security)
   - Depends on: Lacuna.RestPki.Client, NuvTools.Common, Microsoft.Extensions.Logging.Abstractions, Microsoft.Extensions.Options.ConfigurationExtensions
 - **NuvTools.Security.Biometrics.Serpro** (depends on NuvTools.Security)
+- **NuvTools.Security.Signing.Azure** (depends on NuvTools.Security)
   - Depends on: NuvTools.Common, NuvTools.Validation, Microsoft.Extensions.Http, Microsoft.Extensions.Options.ConfigurationExtensions
 
 **Contract and provider never share a package.** The provider-neutral contracts (`ICertificateAuthenticator`, `IFaceVerifier` and their result types) live in `NuvTools.Security`, with no dependency of their own. Each provider is a package named `NuvTools.Security.<Area>.<Provider>`, and it is the only place its SDK or wire format may be referenced. A new provider is a new package; nothing provider-specific goes into `NuvTools.Security`, and neither provider package takes the ASP.NET Core framework reference.
@@ -271,11 +273,24 @@ SERPRO Datavalid behind `IFaceVerifier`. The only place Datavalid's wire format 
 
 **SerproBiometricsServiceCollectionExtensions** - `AddSerproFaceVerification(configuration, sectionName = "Datavalid", timeoutInSeconds = 30)` binds the section
 
+### NuvTools.Security.Signing.Azure Library
+
+Azure Key Vault behind `ISigningKeyProvider`. The contract and the vendor-neutral key are in `NuvTools.Security` (`Signing/`): `ISigningKeyProvider` returns the signing credentials in order of preference, and `RemoteRsaSecurityKey` is an `RsaSecurityKey` holding only public parameters whose signatures are created by a delegate, through its own `CryptoProviderFactory` (`RemoteSigningCryptoProvider`, `RemoteSignatureProvider`, both internal). It reports `PrivateKeyStatus.Exists` so issuers accept it.
+
+**KeyVaultSigningKeyProvider / KeyVaultSigningOptions** (`NuvTools.Security.Signing.Azure`)
+- Offers every enabled version of the key within its validity period; RSA only, `RS256`
+- `SigningKeyOrder.Arrange` (internal) picks the signer: the newest version published for at least `ActivationDelay`, else the oldest
+- The version list is cached for `RefreshInterval`; a failed refresh keeps the previous list and is retried after the interval, not on every call
+- Signing is a synchronous `CryptographyClient.SignData`, because the token handler's signing call is synchronous
+- Tests use hand-written `KeyClient` and `CryptographyClient` subclasses (`tests/.../Signing/Fake*.cs`); nothing has been run against a real vault yet
+
+**KeyVaultSigningServiceCollectionExtensions** - `AddKeyVaultSigningKeys(configuration, sectionName = "KeyVaultSigning", credential = null)` binds the section and registers the provider; the credential defaults to `DefaultAzureCredential`
+
 ## CI and Releasing
 
 `.github/workflows/ci.yml` builds the solution in Release with `-warnaserror` and runs the tests on every push and pull request to `main`.
 
-Each package has its own manually-run publish workflow (`security-publish.yml`, `aspnetcore-publish.yml`, `blazor-publish.yml`, `certificate-lacuna-publish.yml`, `biometrics-serpro-publish.yml`), all calling the reusable `package-publish.yml`. It reads `<Version>` from the `.csproj` (never computes it), verifies the package, pushes through nuget.org trusted publishing behind the `nuget` environment, and then writes the release tag (`security-vX.Y.Z`, …). See *Releasing* in the README.
+Each package has its own manually-run publish workflow (`security-publish.yml`, `aspnetcore-publish.yml`, `blazor-publish.yml`, `certificate-lacuna-publish.yml`, `biometrics-serpro-publish.yml`, `signing-azure-publish.yml`), all calling the reusable `package-publish.yml`. It reads `<Version>` from the `.csproj` (never computes it), verifies the package, pushes through nuget.org trusted publishing behind the `nuget` environment, and then writes the release tag (`security-vX.Y.Z`, …). See *Releasing* in the README.
 
 - A new package needs its own small workflow file and a row in the README table.
 - The SourceLink and symbol settings (`PublishRepositoryUrl`, `EmbedUntrackedSources`, `IncludeSymbols`, `snupkg`) must be in every packable project: the workflow fails a package without its `.snupkg`.

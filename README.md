@@ -63,6 +63,30 @@ SERPRO Datavalid behind the `IFaceVerifier` contract that `NuvTools.Security` de
 
 > The contracts live in `NuvTools.Security`; each provider is a package of its own. An application depends on `ICertificateAuthenticator` and `IFaceVerifier`, names the provider once at registration, and changes provider by changing that one call.
 
+### NuvTools.Security.Signing.Azure
+
+Azure Key Vault behind the `ISigningKeyProvider` contract of `NuvTools.Security`: a token issuer
+signs with an RSA key that never leaves the vault.
+
+- **`KeyVaultSigningKeyProvider`** - Holds the public half of each enabled key version and asks the vault for every signature (`RS256`)
+- **Rotation without a restart** - A new version is published at the next refresh and starts signing after an activation delay; older versions stay published so their tokens keep validating
+- **`AddKeyVaultSigningKeys`** - Binds `KeyVaultSigningOptions` (`VaultUri`, `KeyName`, `ActivationDelay`, `RefreshInterval`) from the `KeyVaultSigning` section
+
+The neutral half lives in `NuvTools.Security`: `ISigningKeyProvider`, and `RemoteRsaSecurityKey`, an
+`RsaSecurityKey` whose signatures are created by a delegate. The identity reaching the vault needs
+the `Key Vault Crypto User` role.
+
+```csharp
+using NuvTools.Security.Signing;
+using NuvTools.Security.Signing.Azure.Extensions;  // the key store, named here and nowhere else
+
+builder.Services.AddKeyVaultSigningKeys(builder.Configuration);
+
+// wherever tokens are issued
+var credentials = await signingKeys.GetSigningCredentialsAsync();
+var signWith = credentials[0];      // the rest are published alongside it
+```
+
 ## Installation
 
 Install via NuGet Package Manager:
@@ -82,6 +106,7 @@ dotnet add package NuvTools.Security.Certificate.Lacuna
 
 # For facial verification, through SERPRO Datavalid (includes NuvTools.Security)
 dotnet add package NuvTools.Security.Biometrics.Serpro
+dotnet add package NuvTools.Security.Signing.Azure
 ```
 
 Or via Package Manager Console:
@@ -627,6 +652,7 @@ exactly one package. The steps themselves are shared, in the reusable `package-p
 | `NuvTools.Security.AspNetCore.Blazor` | `blazor-publish.yml` | `blazor-vX.Y.Z` |
 | `NuvTools.Security.Certificate.Lacuna` | `certificate-lacuna-publish.yml` | `certificate-lacuna-vX.Y.Z` |
 | `NuvTools.Security.Biometrics.Serpro` | `biometrics-serpro-publish.yml` | `biometrics-serpro-vX.Y.Z` |
+| `NuvTools.Security.Signing.Azure` | `signing-azure-publish.yml` | `signing-azure-vX.Y.Z` |
 
 1. Set the package's `<Version>` in its `.csproj` and merge it. That is the version that gets
    published; the workflow reads it and never computes one.
