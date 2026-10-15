@@ -8,7 +8,7 @@
 		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
 		<Description>Azure Key Vault implementation of the NuvTools.Security signing key contract: tokens are signed by a key that never leaves the vault, and a rotated key is picked up without a restart.</Description>
-		<Version>10.0.0</Version>
+		<Version>10.0.1</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -43,8 +43,8 @@
 		     depends on ISigningKeyProvider alone. -->
 		<PackageReference Include="Azure.Identity" Version="1.21.0" />
 		<PackageReference Include="Azure.Security.KeyVault.Keys" Version="4.10.2" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.13" />
 
 		<ProjectReference Include="..\NuvTools.Security\NuvTools.Security.csproj" />
 	</ItemGroup>
