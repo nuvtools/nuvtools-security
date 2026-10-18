@@ -32,6 +32,7 @@ Security configuration, authenticated user services and adaptive CAPTCHA verific
 - **Current User Service**: Access current authenticated user and connection details via dependency injection
 - **Adaptive CAPTCHA Filter**: `[ValidateCaptcha]` gates public endpoints — invisible score check by default, escalating to a checkbox challenge when the risk is high
 - **reCAPTCHA Enterprise Verifier**: creates the assessment on Google Cloud; the API key never leaves the server
+- **Rate Limiting per Client Address**: `AddFixedWindowPerClientAddress` gives each anonymous endpoint (sign-in, sign-up, password recovery) its own fixed-window allowance per address
 
 > Requires the ASP.NET Core shared framework. Do **not** reference it from a WebAssembly project — use `NuvTools.Security` for the shared contract instead.
 
@@ -380,6 +381,33 @@ builder.Services.AddOidcAuthentication(options =>
 // Use custom OIDC provider
 builder.Services.AddScoped<AuthenticationStateProvider, OidcAuthenticationStateProvider>();
 ```
+
+### Rate Limiting per Client Address
+
+Each policy counts per address and on its own, so asking for reset links cannot use up the allowance for spending one. There is no queue: a caller past the limit is answered 429 at once.
+
+```csharp
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowPerClientAddress("SignIn", permitLimit: 10, TimeSpan.FromMinutes(5));
+    options.AddFixedWindowPerClientAddress("PasswordReset", permitLimit: 3, TimeSpan.FromMinutes(15));
+
+    // Status 429 and Retry-After; the body is yours to write.
+    options.OnRejected = (context, _) =>
+    {
+        context.SetTooManyRequests();
+        return ValueTask.CompletedTask;
+    };
+});
+
+app.UseForwardedHeaders(); // behind a proxy, or every caller shares the proxy's address
+app.UseRateLimiter();
+
+[EnableRateLimiting("SignIn")]
+public IActionResult OnPost() { ... }
+```
+
+An address is something a caller can vary. This bounds noise and simple scripts; account lockout and a single answer for every failure are still what stop guessing and enumeration.
 
 ### Adaptive CAPTCHA
 
