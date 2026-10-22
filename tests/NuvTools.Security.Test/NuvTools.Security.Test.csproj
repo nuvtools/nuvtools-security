@@ -23,6 +23,7 @@
 	  <ProjectReference Include="..\..\src\NuvTools.Security.Biometrics.Serpro\NuvTools.Security.Biometrics.Serpro.csproj" />
 	  <ProjectReference Include="..\..\src\NuvTools.Security.Certificate.Lacuna\NuvTools.Security.Certificate.Lacuna.csproj" />
 	  <ProjectReference Include="..\..\src\NuvTools.Security.Signing.Azure\NuvTools.Security.Signing.Azure.csproj" />
+	  <ProjectReference Include="..\..\src\NuvTools.Security.Verification.Twilio\NuvTools.Security.Verification.Twilio.csproj" />
 	</ItemGroup>
 
 </Project>

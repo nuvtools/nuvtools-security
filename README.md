@@ -66,6 +66,14 @@ SERPRO Datavalid behind the `IFaceVerifier` contract that `NuvTools.Security` de
 - **Government record**: the capture is matched against the face on record for a CPF, with a cached gateway token
 - **The application decides**: minimum similarity and accepted liveness values are configuration, not code
 
+### NuvTools.Security.Verification.Twilio
+
+Twilio Verify behind the `IPhoneVerifier` contract that `NuvTools.Security` defines.
+
+**Key Features:**
+- **The code is never yours**: Twilio generates, sends, expires and checks it; the application only asks whether what the person typed was right
+- **Billed calls are guarded**: a number not in E.164 form and a code that cannot be right never reach Twilio
+
 > The contracts live in `NuvTools.Security`; each provider is a package of its own. An application depends on `ICertificateAuthenticator` and `IFaceVerifier`, names the provider once at registration, and changes provider by changing that one call.
 
 ### NuvTools.Security.Signing.Azure
@@ -111,6 +119,9 @@ dotnet add package NuvTools.Security.Certificate.Lacuna
 
 # For facial verification, through SERPRO Datavalid (includes NuvTools.Security)
 dotnet add package NuvTools.Security.Biometrics.Serpro
+
+# For one-time codes by text message or call, through Twilio Verify (includes NuvTools.Security)
+dotnet add package NuvTools.Security.Verification.Twilio
 dotnet add package NuvTools.Security.Signing.Azure
 ```
 
@@ -643,6 +654,49 @@ Verify and sign in within the same server operation. An endpoint that only verif
 
 Neither the image nor the CPF is stored or logged.
 
+### Phone Verification
+
+A one-time code goes to the number, and the code the person types back is checked. The provider
+holds the code; the application has nothing to store or compare.
+
+```json
+{
+  "TwilioVerify": {
+    "ApiKeySid": "SK…",
+    "ApiKeySecret": "<from the vault>",
+    "ServiceSid": "VA…"
+  }
+}
+```
+
+```csharp
+using NuvTools.Security.Verification;                    // the contract, from NuvTools.Security
+using NuvTools.Security.Verification.Twilio.Extensions;  // the provider — named here and nowhere else
+
+builder.Services.AddTwilioPhoneVerification(builder.Configuration);
+
+// What the person typed, in E.164 form; national numbers take the default country calling code
+if (!E164PhoneNumber.TryNormalize(input, "55", out var number))
+    return BadRequest();
+
+var sent = await verifier.StartAsync(number, locale: "pt-BR", cancellationToken: cancellationToken);
+
+// Later, with the code the person typed
+var checkedCode = await verifier.CheckAsync(number, code, cancellationToken);
+
+if (!checkedCode.Succeeded)
+    return Unauthorized(MessageFor(checkedCode.Failure));
+```
+
+`PhoneVerificationFailureType` tells which message helps: a new code fixes `Expired`, typing again
+fixes `CodeIncorrect`, waiting fixes `TooManyAttempts`, and only another number fixes
+`InvalidNumber`. A code is good once. Both calls fail closed: Twilio unreachable, or the credentials
+refused, answers `Unavailable` — never success. Without the three settings every call answers
+`Unavailable`, so an application can check `TwilioVerifyOptions.IsConfigured` to hide the option.
+
+Rate-limit `StartAsync` per person and per address: each text message is billed, and Twilio's own
+limits are per number.
+
 ### Changing Provider
 
 Everything above the registration depends on `ICertificateAuthenticator` or `IFaceVerifier` from `NuvTools.Security`. Another provider is a class implementing the contract — in a package of its own, so its dependencies reach only those who choose it — and one line changed at startup:
@@ -702,6 +756,7 @@ exactly one package. The steps themselves are shared, in the reusable `package-p
 | `NuvTools.Security.Certificate.Lacuna` | `certificate-lacuna-publish.yml` | `certificate-lacuna-vX.Y.Z` |
 | `NuvTools.Security.Biometrics.Serpro` | `biometrics-serpro-publish.yml` | `biometrics-serpro-vX.Y.Z` |
 | `NuvTools.Security.Signing.Azure` | `signing-azure-publish.yml` | `signing-azure-vX.Y.Z` |
+| `NuvTools.Security.Verification.Twilio` | `verification-twilio-publish.yml` | `verification-twilio-vX.Y.Z` |
 
 1. Set the package's `<Version>` in its `.csproj` and merge it. That is the version that gets
    published; the workflow reads it and never computes one.

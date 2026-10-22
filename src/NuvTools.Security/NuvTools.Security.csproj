@@ -7,8 +7,8 @@
 		<Authors>Nuv Tools</Authors>
 		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
-		<Description>Core security library providing JWT token handling, cryptography utilities, ClaimsPrincipal extensions, the shared CAPTCHA contract, the certificate authentication and facial verification contracts, and SSRF protection for outbound HTTP.</Description>
-		<Version>10.3.5</Version>
+		<Description>Core security library providing JWT token handling, cryptography utilities, ClaimsPrincipal extensions, the shared CAPTCHA contract, the certificate authentication, facial verification and phone verification contracts, and SSRF protection for outbound HTTP.</Description>
+		<Version>10.3.6</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
