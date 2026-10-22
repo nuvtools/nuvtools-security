@@ -13,11 +13,13 @@
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
 		<PackageReference Include="NUnit" Version="5.0.0" />
 		<PackageReference Include="NUnit3TestAdapter" Version="6.3.1" />
+		<PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.13" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\src\NuvTools.Security\NuvTools.Security.csproj" />
 	  <ProjectReference Include="..\..\src\NuvTools.Security.AspNetCore\NuvTools.Security.AspNetCore.csproj" />
+	  <ProjectReference Include="..\..\src\NuvTools.Security.AspNetCore.Entra\NuvTools.Security.AspNetCore.Entra.csproj" />
 	  <ProjectReference Include="..\..\src\NuvTools.Security.Biometrics.Serpro\NuvTools.Security.Biometrics.Serpro.csproj" />
 	  <ProjectReference Include="..\..\src\NuvTools.Security.Certificate.Lacuna\NuvTools.Security.Certificate.Lacuna.csproj" />
 	  <ProjectReference Include="..\..\src\NuvTools.Security.Signing.Azure\NuvTools.Security.Signing.Azure.csproj" />

@@ -36,6 +36,10 @@ Security configuration, authenticated user services and adaptive CAPTCHA verific
 
 > Requires the ASP.NET Core shared framework. Do **not** reference it from a WebAssembly project — use `NuvTools.Security` for the shared contract instead.
 
+### NuvTools.Security.AspNetCore.Entra
+
+An authentication scheme for service-to-service calls with no shared secret: the caller is a Microsoft Entra managed identity, and the receiver admits a token issued for its own App ID URI to an allowlisted application. Both issuer forms (v1 and v2) are accepted, and an incomplete configuration refuses everybody rather than nobody.
+
 ### NuvTools.Security.AspNetCore.Blazor
 
 Authentication state providers for Blazor applications with JWT and OIDC support, plus the client half of the adaptive CAPTCHA.
@@ -408,6 +412,23 @@ public IActionResult OnPost() { ... }
 ```
 
 An address is something a caller can vary. This bounds noise and simple scripts; account lockout and a single answer for every failure are still what stop guessing and enumeration.
+
+### Service-to-Service Calls with a Managed Identity
+
+```csharp
+builder.Services.AddAuthentication()
+    .AddEntraWorkload("Workload", options =>
+    {
+        options.TenantId = "<tenant id>";
+        options.Audience = "api://<tenant id>/my-api-uat";        // exactly the token's aud
+        options.AllowedApplicationIds = ["<caller's managed identity client id>"];
+    });
+
+[Authorize(AuthenticationSchemes = "Workload")]
+public IActionResult Get() => Ok(User.GetEntraWorkloadApplicationId());
+```
+
+The caller asks for a token with `new DefaultAzureCredential().GetTokenAsync(new(["api://<tenant id>/my-api-uat/.default"]))`. The receiving API's App ID URI comes from an Entra app registration left on v1 tokens (the default), because a managed identity is issued a v1 token whose `aud` is the URI it asked for. Every app in the tenant can ask Entra for that token; the allowlist is what decides who may call.
 
 ### Adaptive CAPTCHA
 
